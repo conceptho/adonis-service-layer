@@ -1,10 +1,38 @@
 {
-  "name": "@conceptho/adonis-service-layer",
-  "version": "0.1.0",
-  "description": "",
-  "main": "index.js",
-  "author": "Conceptho",
-  "license": "MIT",
+  "_from": "@conceptho/adonis-service-layer",
+  "_id": "@conceptho/adonis-service-layer@0.2.1",
+  "_inBundle": false,
+  "_integrity": "sha512-a4nBRbIvxYg3y/WRRdV37XDu76b8zVx2ZDXa6y9JcO1mGYQmdHdfstlt4N8fc76T2D8CI6+V7g0KqtP7FYenvg==",
+  "_location": "/@conceptho/adonis-service-layer",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "@conceptho/adonis-service-layer",
+    "name": "@conceptho/adonis-service-layer",
+    "escapedName": "@conceptho%2fadonis-service-layer",
+    "scope": "@conceptho",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/@conceptho/adonis-service-layer/-/adonis-service-layer-0.2.1.tgz",
+  "_shasum": "0cd6942ea7b273e1a59f13335567e12561e6cf36",
+  "_spec": "@conceptho/adonis-service-layer",
+  "_where": "/home/niddhogur/Documents/Projects/adonis-blueprint",
+  "author": {
+    "name": "Conceptho"
+  },
+  "bugs": {
+    "url": "https://github.com/conceptho/adonis-service-layer/issues"
+  },
+  "bundleDependencies": false,
+  "deprecated": false,
+  "description": "adonis-service-layer",
   "homepage": "https://github.com/conceptho/adonis-service-layer#readme",
   "keywords": [
     "conceptho",
@@ -13,19 +41,8 @@
     "layer",
     "controllers"
   ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/conceptho/adonis-service-layer.git"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "eslint": "./node_modules/.bin/eslint ./ --fix",
-    "publish": "npm run eslint && npm publish --access public",
-    "install-peer-deps": "npm i @adonisjs/ace @adonisjs/auth @adonisjs/bodyparser @adonisjs/cors @adonisjs/fold @adonisjs/framework @adonisjs/ignitor @adonisjs/lucid --no-save"
-  },
-  "bugs": {
-    "url": "https://github.com/conceptho/adonis-service-layer/issues"
-  },
+  "license": "MIT",
+  "name": "@conceptho/adonis-service-layer",
   "devDependencies": {
     "eslint": "^5.14.1",
     "eslint-config-airbnb": "^17.1.0",
@@ -33,15 +50,17 @@
     "eslint-plugin-jsx-a11y": "^6.2.1",
     "eslint-plugin-react": "^7.12.4"
   },
-  "peerDependencies": {
-    "@adonisjs/ace": "^5.0.8",
-    "@adonisjs/auth": "^3.0.7",
-    "@adonisjs/bodyparser": "^2.0.5",
-    "@adonisjs/cors": "^1.0.7",
-    "@adonisjs/fold": "^4.0.9",
-    "@adonisjs/framework": "^5.0.9",
-    "@adonisjs/ignitor": "^2.0.8",
-    "@adonisjs/lucid": "^6.1.3",
-    "@adonisjs/generic-exceptions": "^3.0.1"
-  }
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/conceptho/adonis-service-layer.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "eslint": "eslint ./ --fix",
+    "pre-publish": "npm run eslint && npm publish",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "0.2.1"
 }
