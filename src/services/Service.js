@@ -1,9 +1,8 @@
-const BaseRelation = use('@adonisjs/lucid/src/Lucid/Relations/BaseRelation');
-const Database = use('Database');
-const Model = require('Conceptho/Model');
-
-const { ServiceResponse } = use('Conceptho/Services');
-const { validateAll } = use('Validator');
+const BaseRelation = require('@adonisjs/lucid/src/Lucid/Relations/BaseRelation');
+const Database = require('@adonisjs/lucid/src/Database');
+const Model = require('../models/Model');
+const ServiceResponse = require('../services/ServiceResponse');
+const { validateAll } = require('@adonisjs/lucid/src/Validator');
 
 class Service {
   constructor(model) {
@@ -31,7 +30,7 @@ class Service {
   async update({ model, trx }) {
     return this.validate({
       data: model,
-      transaction: async trx => {
+      transaction: async (trx) => {
         await model.save(trx);
         return model;
       },
@@ -90,7 +89,10 @@ class Service {
   async validateData({ modelData = {} }) {
     if (modelData instanceof Model) {
       if (modelData.constructor.validationRules) {
-        return validateAll(modelData.toJSON(), modelData.constructor.validationRules());
+        return validateAll(
+          modelData.toJSON(),
+          modelData.constructor.validationRules(),
+        );
       }
       return true;
     }
@@ -113,8 +115,8 @@ class Service {
       const query = !byActive
         ? this.Model.query().where('id', primaryKey)
         : this.Model.query()
-            .where('id', primaryKey)
-            .active();
+          .where('id', primaryKey)
+          .active();
       return query.first();
     } catch (notFound) {
       return false;
@@ -140,10 +142,17 @@ class Service {
       }
       responsesData[key] = responses[key].data;
     }
-    return new ServiceResponse(isOk, isOk ? data || responsesData : errors, responsesData);
+    return new ServiceResponse(
+      isOk,
+      isOk ? data || responsesData : errors,
+      responsesData,
+    );
   }
 
-  async finalizeTransaction({ isOk, trx, callbackAfterCommit = () => {}, restart = false }) {
+  async finalizeTransaction({ isOk,
+    trx,
+    callbackAfterCommit = () => {},
+    restart = false }) {
     if (isOk) {
       await trx.commit();
       await callbackAfterCommit();

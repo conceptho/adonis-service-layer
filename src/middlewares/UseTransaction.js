@@ -6,12 +6,8 @@ class UseTransaction {
 
     await next();
 
-    const {
-      response: {
-        response: { statusCode },
-      },
-      trx,
-    } = ctx;
+    const { response: { response: { statusCode } },
+      trx } = ctx;
 
     if (statusCode >= 400) {
       await trx.rollback();

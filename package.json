@@ -1,6 +1,6 @@
 {
   "_from": "@conceptho/adonis-service-layer",
-  "_id": "@conceptho/adonis-service-layer@0.2.1",
+  "_id": "@conceptho/adonis-service-layer@0.2.2",
   "_inBundle": false,
   "_integrity": "sha512-a4nBRbIvxYg3y/WRRdV37XDu76b8zVx2ZDXa6y9JcO1mGYQmdHdfstlt4N8fc76T2D8CI6+V7g0KqtP7FYenvg==",
   "_location": "/@conceptho/adonis-service-layer",
@@ -30,7 +30,7 @@
   "bugs": {
     "url": "https://github.com/conceptho/adonis-service-layer/issues"
   },
-  "bundleDependencies": false,
+  "bundleDependencies": [],
   "deprecated": false,
   "description": "adonis-service-layer",
   "homepage": "https://github.com/conceptho/adonis-service-layer#readme",
@@ -62,5 +62,5 @@
     "pre-publish": "npm run eslint && npm publish",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "version": "0.2.1"
+  "version": "0.2.3"
 }
