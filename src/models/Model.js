@@ -1,14 +1,14 @@
-import Model from '@adonisjs/lucid/src/Lucid/Model';
-import DefaultSerializer from '../Serializers/Default';
+const AdonisModel = use('Model');
+const DefaultSerializer = require('../serializers/DefaultSerializer');
 
-class Base extends Model {
+class Model extends AdonisModel {
   static boot() {
     super.boot();
 
     this.addHook('beforeUpdate', 'BeforeUpdateHook.updateDate');
   }
 
-  static bootIfNotBooted() {
+  static _bootIfNotBooted() {
     if (!this.$bootedBy) {
       this.$bootedBy = [];
     }
@@ -58,4 +58,4 @@ class Base extends Model {
   }
 }
 
-module.exports = Base;
+module.exports = Model;

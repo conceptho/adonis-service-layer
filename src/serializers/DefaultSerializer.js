@@ -1,6 +1,6 @@
 const VanillaSerializer = require('@adonisjs/lucid/src/Lucid/Serializers/Vanilla');
 
-class CustomSerializer extends VanillaSerializer {
+class DefaultSerializer extends VanillaSerializer {
   /**
    * Returns the json object for a given model instance
    *
@@ -23,4 +23,4 @@ class CustomSerializer extends VanillaSerializer {
   }
 }
 
-module.exports = CustomSerializer;
+module.exports = DefaultSerializer;

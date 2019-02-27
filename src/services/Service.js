@@ -1,12 +1,12 @@
-import BaseRelation from '@adonisjs/lucid/src/Lucid/Relations/BaseRelation';
-import Database from '@adonisjs/lucid/src/Database';
-
+// Adonis dependant
+const Database = use('Database');
+const BaseRelation = use('@adonisjs/lucid/src/Lucid/Relations/BaseRelation');
 const { validateAll } = use('Validator');
 
-const Model = use('Model');
-const ServiceResponse = use('App/Services/ServiceResponse');
+const Model = require('../models/Model');
+const ServiceResponse = require('../services/ServiceResponse');
 
-class BaseService {
+class Service {
   constructor(model) {
     this.Model = model;
   }
@@ -23,9 +23,11 @@ class BaseService {
     const find = await this.query({ byActive, trx })
       .where(whereAttributes)
       .first();
+
     if (find) {
       return new ServiceResponse(true, find);
     }
+
     return this.create({ modelData: data, trx });
   }
 
@@ -134,6 +136,7 @@ class BaseService {
     let isOk = true;
     const responsesData = {};
     const errors = {};
+
     for (const key in responses) {
       isOk = isOk && responses[key].isOk;
       if (!responses[key].isOk) {
@@ -164,4 +167,4 @@ class BaseService {
   }
 }
 
-export default BaseService;
+module.exports = Service;

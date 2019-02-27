@@ -1,3 +1,3 @@
-module.exports = {
-  helloPackage: () => console.log('Hello Package'),
-};
+const ServiceLayerProvider = require('./src/providers/ServiceLayerProvider');
+
+module.exports = ServiceLayerProvider;

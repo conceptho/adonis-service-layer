@@ -71,4 +71,4 @@ const defaultMessages = {
   511: 'Network Authentication Required',
 };
 
-export default defaultMessages;
+module.exports = defaultMessages;

@@ -1,5 +1,5 @@
-import { LogicalException } from '@adonisjs/generic-exceptions';
-import defaultMessages from './defaultMessages';
+const { LogicalException } = require('@adonisjs/generic-exceptions');
+const defaultMessages = require('./defaultMessages');
 
 class ErrorCode extends LogicalException {
   constructor(code, payload, message) {
