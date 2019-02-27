@@ -1,5 +1,5 @@
-const { DefaultSerializer } = use('Conceptho/Serializers');
-const AdonisModel = require('@adonisjs/lucid/src/Lucid/Model');
+const AdonisModel = use('Model');
+const DefaultSerializer = require('../serializers/DefaultSerializer');
 
 class Model extends AdonisModel {
   static boot() {

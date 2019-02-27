@@ -1,5 +1,5 @@
 const { LogicalException } = require('@adonisjs/generic-exceptions');
-const defaultMessages = require('@conceptho/adonis-service-layer/src/exceptions/defaultMessages');
+const defaultMessages = require('../exceptions/defaultMessages');
 
 class ErrorCode extends LogicalException {
   constructor(code, payload, message) {

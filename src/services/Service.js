@@ -1,8 +1,10 @@
-const BaseRelation = require('@adonisjs/lucid/src/Lucid/Relations/BaseRelation');
-const Database = require('@adonisjs/lucid/src/Database');
+// Adonis dependant
+const Database = use('Database');
+const BaseRelation = use('@adonisjs/lucid/src/Lucid/Relations/BaseRelation');
+const { validateAll } = use('Validator');
+
 const Model = require('../models/Model');
 const ServiceResponse = require('../services/ServiceResponse');
-const { validateAll } = require('@adonisjs/lucid/src/Validator');
 
 class Service {
   constructor(model) {
@@ -21,9 +23,11 @@ class Service {
     const find = await this.query({ byActive, trx })
       .where(whereAttributes)
       .first();
+
     if (find) {
       return new ServiceResponse(true, find);
     }
+
     return this.create({ modelData: data, trx });
   }
 
@@ -89,10 +93,7 @@ class Service {
   async validateData({ modelData = {} }) {
     if (modelData instanceof Model) {
       if (modelData.constructor.validationRules) {
-        return validateAll(
-          modelData.toJSON(),
-          modelData.constructor.validationRules(),
-        );
+        return validateAll(modelData.toJSON(), modelData.constructor.validationRules());
       }
       return true;
     }
@@ -135,6 +136,7 @@ class Service {
     let isOk = true;
     const responsesData = {};
     const errors = {};
+
     for (const key in responses) {
       isOk = isOk && responses[key].isOk;
       if (!responses[key].isOk) {
@@ -142,17 +144,10 @@ class Service {
       }
       responsesData[key] = responses[key].data;
     }
-    return new ServiceResponse(
-      isOk,
-      isOk ? data || responsesData : errors,
-      responsesData,
-    );
+    return new ServiceResponse(isOk, isOk ? data || responsesData : errors, responsesData);
   }
 
-  async finalizeTransaction({ isOk,
-    trx,
-    callbackAfterCommit = () => {},
-    restart = false }) {
+  async finalizeTransaction({ isOk, trx, callbackAfterCommit = () => {}, restart = false }) {
     if (isOk) {
       await trx.commit();
       await callbackAfterCommit();

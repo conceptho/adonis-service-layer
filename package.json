@@ -1,39 +1,12 @@
 {
-  "_from": "@conceptho/adonis-service-layer",
-  "_id": "@conceptho/adonis-service-layer@0.2.2",
-  "_inBundle": false,
-  "_integrity": "sha512-a4nBRbIvxYg3y/WRRdV37XDu76b8zVx2ZDXa6y9JcO1mGYQmdHdfstlt4N8fc76T2D8CI6+V7g0KqtP7FYenvg==",
-  "_location": "/@conceptho/adonis-service-layer",
-  "_phantomChildren": {},
-  "_requested": {
-    "type": "tag",
-    "registry": true,
-    "raw": "@conceptho/adonis-service-layer",
-    "name": "@conceptho/adonis-service-layer",
-    "escapedName": "@conceptho%2fadonis-service-layer",
-    "scope": "@conceptho",
-    "rawSpec": "",
-    "saveSpec": null,
-    "fetchSpec": "latest"
-  },
-  "_requiredBy": [
-    "#USER",
-    "/"
-  ],
-  "_resolved": "https://registry.npmjs.org/@conceptho/adonis-service-layer/-/adonis-service-layer-0.2.1.tgz",
-  "_shasum": "0cd6942ea7b273e1a59f13335567e12561e6cf36",
-  "_spec": "@conceptho/adonis-service-layer",
-  "_where": "/home/niddhogur/Documents/Projects/adonis-blueprint",
-  "author": {
-    "name": "Conceptho"
-  },
-  "bugs": {
-    "url": "https://github.com/conceptho/adonis-service-layer/issues"
-  },
+  "version": "0.2.4",
+  "author": "Conceptho",
   "bundleDependencies": [],
   "deprecated": false,
   "description": "adonis-service-layer",
   "homepage": "https://github.com/conceptho/adonis-service-layer#readme",
+  "license": "MIT",
+  "name": "@conceptho/adonis-service-layer",
   "keywords": [
     "conceptho",
     "adonisjs",
@@ -41,14 +14,8 @@
     "layer",
     "controllers"
   ],
-  "license": "MIT",
-  "name": "@conceptho/adonis-service-layer",
-  "devDependencies": {
-    "eslint": "^5.14.1",
-    "eslint-config-airbnb": "^17.1.0",
-    "eslint-plugin-import": "^2.16.0",
-    "eslint-plugin-jsx-a11y": "^6.2.1",
-    "eslint-plugin-react": "^7.12.4"
+  "bugs": {
+    "url": "https://github.com/conceptho/adonis-service-layer/issues"
   },
   "repository": {
     "type": "git",
@@ -62,5 +29,11 @@
     "pre-publish": "npm run eslint && npm publish",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "version": "0.2.3"
+  "devDependencies": {
+    "eslint": "^5.14.1",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-plugin-import": "^2.16.0",
+    "eslint-plugin-jsx-a11y": "^6.2.1",
+    "eslint-plugin-react": "^7.12.4"
+  }
 }
