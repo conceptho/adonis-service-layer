@@ -4,8 +4,10 @@ class ServiceLayerProvider extends ServiceProvider {
   register() {
     // Making sure those dependencies are booted
     const iocDependencies = ['Validator', 'Database'];
-
     iocDependencies.forEach(dep => this.app.use(dep));
+
+    this.app.bind('Conceptho/Middlewares/UseTransaction', () => require('../middlewares/UseTransaction'));
+    this.app.bind('Conceptho/Middlewares/HeaderPagination', () => require('../middlewares/HeaderPagination'));
 
     this.app.bind('Conceptho/Models', () => {
       const Model = require('../models/Model');
@@ -31,13 +33,6 @@ class ServiceLayerProvider extends ServiceProvider {
       const Controller = require('../controllers/Controller');
 
       return { Controller };
-    });
-
-    this.app.bind('Conceptho/Middlewares', () => {
-      const UseTransaction = require('../middlewares/UseTransaction');
-      const HeaderPagination = require('../middlewares/UseTransaction');
-
-      return { UseTransaction, HeaderPagination };
     });
 
     this.app.bind('Conceptho/Services', () => {
