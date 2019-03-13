@@ -4,6 +4,8 @@
   "globals": { "use": true },
 
   "rules": {
+    "no-underscore-dangle": "off",
+    "global-require": "off",
     "class-methods-use-this": ["off"],
     "max-len": [2, 120, 4],
     "object-curly-newline": [

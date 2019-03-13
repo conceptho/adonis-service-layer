@@ -1,7 +1,6 @@
-const AdonisModel = use('Model');
 const DefaultSerializer = require('../serializers/DefaultSerializer');
 
-class Model extends AdonisModel {
+module.exports = AdonisModel => class Model extends AdonisModel {
   static boot() {
     super.boot();
 
@@ -56,6 +55,4 @@ class Model extends AdonisModel {
   static get Serializer() {
     return DefaultSerializer;
   }
-}
-
-module.exports = Model;
+};
