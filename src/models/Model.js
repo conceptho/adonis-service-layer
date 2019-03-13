@@ -1,10 +1,11 @@
 const DefaultSerializer = require('../serializers/DefaultSerializer');
+const ModelHook = require('../hooks/Model');
 
-module.exports = AdonisModel => class Model extends AdonisModel {
+module.exports = (AdonisModel, Validator) => class Model extends AdonisModel {
   static boot() {
     super.boot();
 
-    this.addHook('beforeUpdate', 'BeforeUpdateHook.updateDate');
+    this.addHook('beforeUpdate', ModelHook(Validator).sanitize);
   }
 
   static _bootIfNotBooted() {
@@ -49,6 +50,10 @@ module.exports = AdonisModel => class Model extends AdonisModel {
   }
 
   static validationRules() {
+    return {};
+  }
+
+  static get sanitizeRules() {
     return {};
   }
 

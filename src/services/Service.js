@@ -14,7 +14,9 @@ module.exports = (Database, BaseRelation, Validator) => class Service {
     });
   }
 
-  async findOrCreate({ whereAttributes, data, trx, byActive }) {
+  async findOrCreate({
+    whereAttributes, data, trx, byActive,
+  }) {
     const find = await this.query({ byActive, trx })
       .where(whereAttributes)
       .first();
@@ -29,7 +31,7 @@ module.exports = (Database, BaseRelation, Validator) => class Service {
   async update({ model, trx }) {
     return this.validate({
       data: model,
-      transaction: async (trx) => {
+      transaction: async () => {
         await model.save(trx);
         return model;
       },
@@ -106,7 +108,7 @@ module.exports = (Database, BaseRelation, Validator) => class Service {
     return this.executeTransaction({ transaction, trx });
   }
 
-  async find({ primaryKey, userContext = {}, byActive }) {
+  async find({ primaryKey, byActive }) {
     try {
       const query = !byActive
         ? this.Model.query().where('id', primaryKey)
@@ -119,7 +121,7 @@ module.exports = (Database, BaseRelation, Validator) => class Service {
     }
   }
 
-  query({ userContext = {}, byActive, trx } = {}) {
+  query({ byActive, trx } = {}) {
     const query = this.Model.query();
     if (trx) {
       query.transacting(trx);
@@ -142,7 +144,9 @@ module.exports = (Database, BaseRelation, Validator) => class Service {
     return new ServiceResponse(isOk, isOk ? data || responsesData : errors, responsesData);
   }
 
-  async finalizeTransaction({ isOk, trx, callbackAfterCommit = () => {}, restart = false }) {
+  async finalizeTransaction({
+    isOk, trx, callbackAfterCommit = () => {}, restart = false,
+  }) {
     if (isOk) {
       await trx.commit();
       await callbackAfterCommit();

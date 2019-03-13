@@ -3,7 +3,9 @@ const ServiceResponse = require('../services/ServiceResponse');
 const ErrorCodeException = require('../exceptions/ErrorCodeException');
 
 module.exports = QueryBuilder => class Controller {
-  applyExpand({ data, expand, blackList = [], whiteList = [] }) {
+  applyExpand({
+    data, expand, blackList = [], whiteList = [],
+  }) {
     let expandArray = expand;
     let expandedData = data;
 
@@ -19,7 +21,7 @@ module.exports = QueryBuilder => class Controller {
       if (expandedData instanceof Model) {
         return data.loadMany(expandArray);
       }
-      
+
       if (expandedData instanceof QueryBuilder) {
         for (const i in expandArray) {
           expandedData = expandedData.with(expandArray[i]);
