@@ -8,12 +8,12 @@ class Model extends AdonisModel {
     this.addHook('beforeUpdate', 'BeforeUpdateHook.updateDate');
   }
 
-  static _bootIfNotBooted() {
+  static bootIfNotBooted() {
     if (!this.$bootedBy) {
       this.$bootedBy = [];
     }
 
-    if (this.$bootedBy.indexOf(this.name) < 0) {
+    if (this.$bootedBy.includes(this.name)) {
       this.$bootedBy.push(this.name);
 
       this.boot();
@@ -28,7 +28,7 @@ class Model extends AdonisModel {
     this.deleted = 1;
     const affected = await this.save(transaction);
 
-    if (affected > 0) {
+    if (affected) {
       this.freeze();
     }
   }
@@ -45,11 +45,15 @@ class Model extends AdonisModel {
     return false;
   }
 
-  static relations() {
+  static get relations() {
     return [];
   }
 
-  static validationRules() {
+  static get validationRules() {
+    return {};
+  }
+
+  static get validationMessages() {
     return {};
   }
 

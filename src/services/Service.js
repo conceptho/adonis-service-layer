@@ -93,12 +93,13 @@ class Service {
   async validateData({ modelData = {} }) {
     if (modelData instanceof Model) {
       if (modelData.constructor.validationRules) {
-        return validateAll(modelData.toJSON(), modelData.constructor.validationRules());
+        return validateAll(modelData.toJSON(), modelData.constructor.validationRules, modelData.constructor.validationMessages);
       }
       return true;
     }
+
     if (this.Model.validationRules) {
-      return validateAll(modelData, this.Model.validationRules());
+      return validateAll(modelData, this.Model.validationRules, modelData.constructor.validationMessages);
     }
     return true;
   }
@@ -108,6 +109,7 @@ class Service {
     if (validation instanceof Object && validation.fails()) {
       return new ServiceResponse(false, validation.messages());
     }
+
     return this.executeTransaction({ transaction, trx });
   }
 
@@ -118,6 +120,7 @@ class Service {
         : this.Model.query()
           .where('id', primaryKey)
           .active();
+
       return query.first();
     } catch (notFound) {
       return false;
