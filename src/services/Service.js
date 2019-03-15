@@ -5,17 +5,26 @@ const { validateAll } = use('Validator');
 
 const Model = require('../models/Model');
 const ServiceResponse = require('../services/ServiceResponse');
+const ServiceErrorException = require('../exceptions/ServiceErrorException')
 
+/**
+ * Base Service
+ * A Service must refer to a Model which inherits from Conceptho/Models/Model
+ */
 class Service {
   constructor(model) {
-    this.Model = model;
+    if (!(model instanceof Model)) {
+      throw 'Tried to create a Service that does not handle a Conceptho/Models/Model'
+    }
+
+    this.$model = model;
   }
 
-  async create({ modelData, trx }) {
+  async create(model, transaction) {
     return this.validate({
-      data: modelData,
-      transaction: async trx => this.Model.create(modelData, trx),
-      trx,
+      data: model,
+      transaction: async trx => this.$model.create(model, trx),
+      trx: transaction,
     });
   }
 
@@ -90,22 +99,22 @@ class Service {
     }
   }
 
-  async validateData({ modelData = {} }) {
-    if (modelData instanceof Model) {
-      if (modelData.validationRules) {
-        return validateAll(modelData.toJSON(), modelData.validationRules, modelData.validationMessages);
-      }
-      return true;
+  async validateModel(modelData) {
+    const data = modelData || {}
+
+    if (data instanceof this.$model) {
+      return validateAll(data, this.$model.validationRules, this.$model.validationMessages);
     }
 
-    if (this.Model.validationRules) {
-      return validateAll(modelData, this.Model.validationRules, modelData.constructor.validationMessages);
-    }
-    return true;
+    throw new ServiceErrorException(
+      `Provided model instance is not handled by this service.
+        Expected: ${this.$model.constructor.name}
+        Found: ${data.constructor.name}`
+    )
   }
 
-  async validate({ data, transaction, trx = false }) {
-    const validation = await this.validateData({ modelData: data });
+  async validate(model, transaction, trx = false) {
+    const validation = await this.validateModel(model);
 
     if (validation instanceof Object && validation.fails()) {
       return new ServiceResponse(false, undefined, validation.messages());
@@ -117,8 +126,8 @@ class Service {
   async find({ primaryKey, userContext = {}, byActive }) {
     try {
       const query = !byActive
-        ? this.Model.query().where('id', primaryKey)
-        : this.Model.query()
+        ? this.$model.query().where('id', primaryKey)
+        : this.$model.query()
           .where('id', primaryKey)
           .active();
 
@@ -129,7 +138,7 @@ class Service {
   }
 
   query({ userContext = {}, byActive, trx } = {}) {
-    const query = this.Model.query();
+    const query = this.$model.query();
     if (trx) {
       query.transacting(trx);
     }
@@ -151,7 +160,7 @@ class Service {
     return new ServiceResponse(isOk, isOk ? data || responsesData : errors, responsesData);
   }
 
-  async finalizeTransaction({ isOk, trx, callbackAfterCommit = () => {}, restart = false }) {
+  async finalizeTransaction({ isOk, trx, callbackAfterCommit = () => { }, restart = false }) {
     if (isOk) {
       await trx.commit();
       await callbackAfterCommit();
