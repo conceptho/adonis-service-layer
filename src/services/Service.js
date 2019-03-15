@@ -92,8 +92,8 @@ class Service {
 
   async validateData({ modelData = {} }) {
     if (modelData instanceof Model) {
-      if (modelData.constructor.validationRules) {
-        return validateAll(modelData.toJSON(), modelData.constructor.validationRules, modelData.constructor.validationMessages);
+      if (modelData.validationRules) {
+        return validateAll(modelData.toJSON(), modelData.validationRules, modelData.validationMessages);
       }
       return true;
     }
@@ -106,8 +106,9 @@ class Service {
 
   async validate({ data, transaction, trx = false }) {
     const validation = await this.validateData({ modelData: data });
+
     if (validation instanceof Object && validation.fails()) {
-      return new ServiceResponse(false, validation.messages());
+      return new ServiceResponse(false, undefined, validation.messages());
     }
 
     return this.executeTransaction({ transaction, trx });
