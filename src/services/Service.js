@@ -1,12 +1,7 @@
-// Adonis dependant
-const Database = use('Database')
-const BaseRelation = use('@adonisjs/lucid/src/Lucid/Relations/BaseRelation')
-const { validateAll } = use('Validator')
-
 const Model = require('../models/Model')
 const ServiceResponse = require('../services/ServiceResponse')
 
-class Service {
+module.exports = (Database, BaseRelation, Validator) => class Service {
   constructor (model) {
     this.Model = model
   }
@@ -19,7 +14,9 @@ class Service {
     })
   }
 
-  async findOrCreate ({ whereAttributes, data, trx, byActive }) {
+  async findOrCreate ({
+    whereAttributes, data, trx, byActive
+  }) {
     const find = await this.query({ byActive, trx })
       .where(whereAttributes)
       .first()
@@ -34,7 +31,7 @@ class Service {
   async update ({ model, trx }) {
     return this.validate({
       data: model,
-      transaction: async (trx) => {
+      transaction: async () => {
         await model.save(trx)
         return model
       },
@@ -93,12 +90,12 @@ class Service {
   async validateData ({ modelData = {} }) {
     if (modelData instanceof Model) {
       if (modelData.constructor.validationRules) {
-        return validateAll(modelData.toJSON(), modelData.constructor.validationRules())
+        return Validator.validateAll(modelData.toJSON(), modelData.constructor.validationRules())
       }
       return true
     }
     if (this.Model.validationRules) {
-      return validateAll(modelData, this.Model.validationRules())
+      return Validator.validateAll(modelData, this.Model.validationRules())
     }
     return true
   }
@@ -111,7 +108,7 @@ class Service {
     return this.executeTransaction({ transaction, trx })
   }
 
-  async find ({ primaryKey, userContext = {}, byActive }) {
+  async find ({ primaryKey, byActive }) {
     try {
       const query = !byActive
         ? this.Model.query().where('id', primaryKey)
@@ -124,7 +121,7 @@ class Service {
     }
   }
 
-  query ({ userContext = {}, byActive, trx } = {}) {
+  query ({ byActive, trx } = {}) {
     const query = this.Model.query()
     if (trx) {
       query.transacting(trx)
@@ -147,7 +144,9 @@ class Service {
     return new ServiceResponse(isOk, isOk ? data || responsesData : errors, responsesData)
   }
 
-  async finalizeTransaction ({ isOk, trx, callbackAfterCommit = () => {}, restart = false }) {
+  async finalizeTransaction ({
+    isOk, trx, callbackAfterCommit = () => {}, restart = false
+  }) {
     if (isOk) {
       await trx.commit()
       await callbackAfterCommit()
@@ -166,5 +165,3 @@ class Service {
     }
   }
 }
-
-module.exports = Service
