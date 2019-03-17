@@ -1,20 +1,21 @@
 const DefaultSerializer = require('../serializers/DefaultSerializer')
-const ModelHook = require('../hooks/Model')
 
 module.exports = (AdonisModel, Validator) => class Model extends AdonisModel {
   static boot () {
     super.boot()
 
-    this.addHook('beforeUpdate', ModelHook(Validator).sanitize)
-    this.addHook('beforeUpdate', ModelHook(Validator).updateModifiedDate)
+    const ModelHook = require('../hooks/Model')(Validator)
+
+    this.addHook('beforeUpdate', ModelHook.sanitize)
+    this.addHook('beforeUpdate', ModelHook.updateModifiedDate)
   }
 
-  static _bootIfNotBooted () {
+  static bootIfNotBooted () {
     if (!this.$bootedBy) {
       this.$bootedBy = []
     }
 
-    if (this.$bootedBy.indexOf(this.name) < 0) {
+    if (this.$bootedBy.includes(this.name)) {
       this.$bootedBy.push(this.name)
 
       this.boot()

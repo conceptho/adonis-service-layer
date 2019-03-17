@@ -32,7 +32,7 @@ module.exports = QueryBuilder => class Controller {
     return expandedData
   }
 
-  async verifyServiceResponse ({ response, serviceResponse, callbackWhenIsOk = async () => {} }) {
+  async verifyServiceResponse ({ response, serviceResponse, callbackWhenIsOk = async () => { } }) {
     const { isOk, data } = serviceResponse
 
     if (serviceResponse instanceof ServiceResponse) {

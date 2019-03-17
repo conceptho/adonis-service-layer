@@ -145,7 +145,7 @@ module.exports = (Database, BaseRelation, Validator) => class Service {
   }
 
   async finalizeTransaction ({
-    isOk, trx, callbackAfterCommit = () => {}, restart = false
+    isOk, trx, callbackAfterCommit = () => { }, restart = false
   }) {
     if (isOk) {
       await trx.commit()
