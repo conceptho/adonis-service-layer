@@ -1,3 +1,3 @@
-const ServiceLayerProvider = require('./src/providers/ServiceLayerProvider');
+const ServiceLayerProvider = require('./src/providers/ServiceLayerProvider')
 
-module.exports = ServiceLayerProvider;
+module.exports = ServiceLayerProvider

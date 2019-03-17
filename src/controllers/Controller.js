@@ -1,59 +1,59 @@
-const QueryBuilder = require('@adonisjs/lucid/src/Lucid/QueryBuilder');
-const Model = require('../models/Model');
-const ServiceResponse = require('../services/ServiceResponse');
-const ErrorCodeException = require('../exceptions/ErrorCodeException');
+const QueryBuilder = require('@adonisjs/lucid/src/Lucid/QueryBuilder')
+const Model = require('../models/Model')
+const ServiceResponse = require('../services/ServiceResponse')
+const ErrorCodeException = require('../exceptions/ErrorCodeException')
 
 /**
  * Resourceful controller for interacting with bases
  */
 class Controller {
-  applyExpand({ data, expand, blackList = [], whiteList = [] }) {
-    let expandArray = expand;
-    let expandedData = data;
+  applyExpand ({ data, expand, blackList = [], whiteList = [] }) {
+    let expandArray = expand
+    let expandedData = data
 
     if (typeof expandArray === 'string') {
-      expandArray = expandArray.replace(/ /g, '').split(',');
+      expandArray = expandArray.replace(/ /g, '').split(',')
     }
 
     if (expandArray && expandArray instanceof Array) {
       expandArray = [...new Set(expandArray)].filter(
-        value => !blackList.includes(value) && whiteList.includes(value),
-      );
+        value => !blackList.includes(value) && whiteList.includes(value)
+      )
 
       if (expandedData instanceof Model) {
-        return data.loadMany(expandArray);
+        return data.loadMany(expandArray)
       }
       if (expandedData instanceof QueryBuilder) {
         for (const i in expandArray) {
-          expandedData = expandedData.with(expandArray[i]);
+          expandedData = expandedData.with(expandArray[i])
         }
       }
     }
 
-    return expandedData;
+    return expandedData
   }
 
-  async verifyServiceResponse({ response,
+  async verifyServiceResponse ({ response,
     serviceResponse,
     callbackWhenIsOk = async () => {} }) {
-    const { isOk, data } = serviceResponse;
+    const { isOk, data } = serviceResponse
 
     if (serviceResponse instanceof ServiceResponse) {
       if (isOk) {
         if (data) {
-          await callbackWhenIsOk(data);
+          await callbackWhenIsOk(data)
 
-          return data;
+          return data
         }
 
-        return response.noContent();
+        return response.noContent()
       }
 
-      throw new ErrorCodeException(400, data);
+      throw new ErrorCodeException(400, data)
     }
 
-    throw new ErrorCodeException(500, data);
+    throw new ErrorCodeException(500, data)
   }
 }
 
-module.exports = Controller;
+module.exports = Controller

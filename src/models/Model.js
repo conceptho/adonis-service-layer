@@ -1,61 +1,61 @@
-const AdonisModel = use('Model');
-const DefaultSerializer = require('../serializers/DefaultSerializer');
+const AdonisModel = use('Model')
+const DefaultSerializer = require('../serializers/DefaultSerializer')
 
 class Model extends AdonisModel {
-  static boot() {
-    super.boot();
+  static boot () {
+    super.boot()
 
-    this.addHook('beforeUpdate', 'BeforeUpdateHook.updateDate');
+    this.addHook('beforeUpdate', 'BeforeUpdateHook.updateDate')
   }
 
-  static _bootIfNotBooted() {
+  static _bootIfNotBooted () {
     if (!this.$bootedBy) {
-      this.$bootedBy = [];
+      this.$bootedBy = []
     }
 
     if (this.$bootedBy.indexOf(this.name) < 0) {
-      this.$bootedBy.push(this.name);
+      this.$bootedBy.push(this.name)
 
-      this.boot();
+      this.boot()
     }
   }
 
-  static scopeActive(query) {
-    return query.andWhere({ deleted: 0 });
+  static scopeActive (query) {
+    return query.andWhere({ deleted: 0 })
   }
 
-  async softDelete(transaction) {
-    this.deleted = 1;
-    const affected = await this.save(transaction);
+  async softDelete (transaction) {
+    this.deleted = 1
+    const affected = await this.save(transaction)
 
     if (affected > 0) {
-      this.freeze();
+      this.freeze()
     }
   }
 
-  async undelete(transaction) {
+  async undelete (transaction) {
     if (this.hasOwnProperty('deleted')) {
-      this.unfreeze();
-      this.deleted = 0;
+      this.unfreeze()
+      this.deleted = 0
 
-      const affected = await this.save(transaction);
-      return !!affected;
+      const affected = await this.save(transaction)
+      return !!affected
     }
 
-    return false;
+    return false
   }
 
-  static relations() {
-    return [];
+  static relations () {
+    return []
   }
 
-  static validationRules() {
-    return {};
+  static validationRules () {
+    return {}
   }
 
-  static get Serializer() {
-    return DefaultSerializer;
+  static get Serializer () {
+    return DefaultSerializer
   }
 }
 
-module.exports = Model;
+module.exports = Model

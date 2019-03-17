@@ -1,20 +1,20 @@
-const Database = use('Database');
+const Database = use('Database')
 
 class UseTransaction {
-  async handle(ctx, next) {
-    ctx.trx = await Database.beginTransaction();
+  async handle (ctx, next) {
+    ctx.trx = await Database.beginTransaction()
 
-    await next();
+    await next()
 
     const { response: { response: { statusCode } },
-      trx } = ctx;
+      trx } = ctx
 
     if (statusCode >= 400) {
-      await trx.rollback();
+      await trx.rollback()
     } else {
-      await trx.commit();
+      await trx.commit()
     }
   }
 }
 
-module.exports = UseTransaction;
+module.exports = UseTransaction
