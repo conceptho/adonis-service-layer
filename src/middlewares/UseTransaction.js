@@ -1,19 +1,24 @@
 const Database = use('Database')
 
 class UseTransaction {
-  async handle (ctx, next) {
+  async begin (ctx) {
     ctx.trx = await Database.beginTransaction()
+  }
 
-    await next()
-
-    const { response: { response: { statusCode } },
-      trx } = ctx
-
+  async finish ({ response: { response: { statusCode } }, trx }) {
     if (statusCode >= 400) {
       await trx.rollback()
     } else {
       await trx.commit()
     }
+  }
+
+  async handle (ctx, next) {
+    await this.begin(ctx)
+
+    await next()
+
+    await this.finish(ctx)
   }
 }
 

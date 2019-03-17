@@ -1,6 +1,9 @@
 const { LogicalException } = require('@adonisjs/generic-exceptions')
 const defaultMessages = require('./defaultMessages')
 
+/**
+ * Handle an error with given code, returning any payload to the response.
+ */
 class ErrorCodeException extends LogicalException {
   constructor (code, payload, message) {
     // super default args: message, status, code

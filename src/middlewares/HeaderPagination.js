@@ -1,3 +1,6 @@
+/**
+ * Inserts pagination info in the response header
+ */
 class HeaderPagination {
   async handle ({ request, response }, next) {
     await next()
