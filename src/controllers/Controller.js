@@ -1,13 +1,11 @@
-const QueryBuilder = require('@adonisjs/lucid/src/Lucid/QueryBuilder');
 const Model = require('../models/Model');
 const ServiceResponse = require('../services/ServiceResponse');
 const ErrorCodeException = require('../exceptions/ErrorCodeException');
 
-/**
- * Resourceful controller for interacting with bases
- */
-class Controller {
-  applyExpand({ data, expand, blackList = [], whiteList = [] }) {
+module.exports = QueryBuilder => class Controller {
+  applyExpand({
+    data, expand, blackList = [], whiteList = [],
+  }) {
     let expandArray = expand;
     let expandedData = data;
 
@@ -23,6 +21,7 @@ class Controller {
       if (expandedData instanceof Model) {
         return data.loadMany(expandArray);
       }
+
       if (expandedData instanceof QueryBuilder) {
         for (const i in expandArray) {
           expandedData = expandedData.with(expandArray[i]);
@@ -33,9 +32,7 @@ class Controller {
     return expandedData;
   }
 
-  async verifyServiceResponse({ response,
-    serviceResponse,
-    callbackWhenIsOk = async () => {} }) {
+  async verifyServiceResponse({ response, serviceResponse, callbackWhenIsOk = async () => {} }) {
     const { isOk, data } = serviceResponse;
 
     if (serviceResponse instanceof ServiceResponse) {
@@ -54,6 +51,4 @@ class Controller {
 
     throw new ErrorCodeException(500, data);
   }
-}
-
-module.exports = Controller;
+};

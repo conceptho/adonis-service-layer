@@ -10,8 +10,8 @@
 
 Each middleware is defined in its own namespace:
 
-| Middleware |
-|:---:|
+|                Middleware                |
+|:----------------------------------------:|
 | `Conceptho/Middlewares/UseTransaction`   |
 | `Conceptho/Middlewares/HeaderPagination` |
 
