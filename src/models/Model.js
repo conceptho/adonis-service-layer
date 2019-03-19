@@ -5,7 +5,9 @@ class Model extends AdonisModel {
   static boot() {
     super.boot();
 
-    this.addHook('beforeUpdate', 'BeforeUpdateHook.updateDate');
+    const updateDateHook = require('./Hooks/updateDate')
+
+    this.addHook('beforeUpdate', updateDateHook);
   }
 
   static _bootIfNotBooted() {
