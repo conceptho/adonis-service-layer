@@ -11,6 +11,8 @@ module.exports = (AdonisModel, Validator) => class Model extends AdonisModel {
   }
 
   static bootIfNotBooted () {
+    AdonisModel._bootIfNotBooted()
+
     if (!this.$bootedBy) {
       this.$bootedBy = []
     }
@@ -30,7 +32,7 @@ module.exports = (AdonisModel, Validator) => class Model extends AdonisModel {
     this.deleted = 1
     const affected = await this.save(transaction)
 
-    if (affected > 0) {
+    if (affected) {
       this.freeze()
     }
   }
@@ -51,7 +53,11 @@ module.exports = (AdonisModel, Validator) => class Model extends AdonisModel {
     return []
   }
 
-  static validationRules () {
+  static get validationRules () {
+    return {}
+  }
+
+  static get validationMessages () {
     return {}
   }
 

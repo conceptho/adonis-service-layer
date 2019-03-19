@@ -2,53 +2,60 @@ const Model = require('../models/Model')
 const ServiceResponse = require('../services/ServiceResponse')
 const ErrorCodeException = require('../exceptions/ErrorCodeException')
 
-module.exports = QueryBuilder => class Controller {
-  applyExpand ({
-    data, expand, blackList = [], whiteList = []
-  }) {
-    let expandArray = expand
-    let expandedData = data
+module.exports = QueryBuilder => {
+  /**
+   *  Default Controller
+   */
+  return class Controller {
+    /**
+     * Expand the relations of a model
+     */
+    applyExpand ({ data, expand, blackList = [], whiteList = [] }) {
+      let expandArray = expand
+      let expandedData = data
 
-    if (typeof expandArray === 'string') {
-      expandArray = expandArray.replace(/ /g, '').split(',')
-    }
-
-    if (expandArray && expandArray instanceof Array) {
-      expandArray = [...new Set(expandArray)].filter(
-        value => !blackList.includes(value) && whiteList.includes(value)
-      )
-
-      if (expandedData instanceof Model) {
-        return data.loadMany(expandArray)
+      if (typeof expandArray === 'string') {
+        expandArray = expandArray.replace(/ /g, '').split(',')
       }
 
-      if (expandedData instanceof QueryBuilder) {
-        for (const i in expandArray) {
-          expandedData = expandedData.with(expandArray[i])
-        }
-      }
-    }
+      if (expandArray && expandArray instanceof Array) {
+        expandArray = [...new Set(expandArray)].filter(value => !blackList.includes(value) && whiteList.includes(value))
 
-    return expandedData
-  }
-
-  async verifyServiceResponse ({ response, serviceResponse, callbackWhenIsOk = async () => { } }) {
-    const { isOk, data } = serviceResponse
-
-    if (serviceResponse instanceof ServiceResponse) {
-      if (isOk) {
-        if (data) {
-          await callbackWhenIsOk(data)
-
-          return data
+        if (expandedData instanceof Model) {
+          return data.loadMany(expandArray)
         }
 
-        return response.noContent()
+        if (expandedData instanceof QueryBuilder) {
+          for (const i in expandArray) {
+            expandedData = expandedData.with(expandArray[i])
+          }
+        }
       }
 
-      throw new ErrorCodeException(400, data)
+      return expandedData
     }
 
-    throw new ErrorCodeException(500, data)
+    /**
+     * Verify a response returned by a Service.
+     */
+    async verifyServiceResponse ({ response, serviceResponse, callback = async () => { } }) {
+      const { success, data } = serviceResponse
+
+      if (serviceResponse instanceof ServiceResponse) {
+        if (success) {
+          if (data) {
+            await callback(data)
+
+            return data
+          }
+
+          return response.noContent()
+        }
+
+        throw new ErrorCodeException(400, data)
+      }
+
+      throw new ErrorCodeException(500, data)
+    }
   }
 }

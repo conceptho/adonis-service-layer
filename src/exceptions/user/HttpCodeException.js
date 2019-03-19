@@ -4,7 +4,13 @@ const defaultMessages = require('./defaultMessages')
 /**
  * Handle an error with given code, returning any payload to the response.
  */
-class ErrorCodeException extends LogicalException {
+class HttpCodeException extends LogicalException {
+  /**
+   * Create a new ErrorCodeException.
+   * @param {number} code
+   * @param {*} payload
+   * @param {*} message
+   */
   constructor (code, payload, message) {
     // super default args: message, status, code
     super(undefined, undefined, code)
@@ -18,4 +24,4 @@ class ErrorCodeException extends LogicalException {
   }
 }
 
-module.exports = ErrorCodeException
+module.exports = HttpCodeException
