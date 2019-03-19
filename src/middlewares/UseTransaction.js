@@ -20,4 +20,4 @@ class UseTransaction {
   }
 }
 
-module.exports = new UseTransaction();
+module.exports = new UseTransaction()

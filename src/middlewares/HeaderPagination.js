@@ -5,7 +5,7 @@ class HeaderPagination {
   async handle ({ request, response }, next) {
     await next()
 
-    this.paginateOnHeader({ response, request });
+    this.paginateOnHeader({ response, request })
   }
 
   paginateOnHeader ({ response }) {
@@ -22,4 +22,4 @@ class HeaderPagination {
   }
 }
 
-module.exports = new HeaderPagination();
+module.exports = new HeaderPagination()
