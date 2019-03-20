@@ -12,11 +12,13 @@ module.exports = {
         table.string('email').notNullable()
         table.string('password').notNullable()
         table.boolean('deleted').defaultTo(false)
+        table.timestamps()
       }),
       db.schema.createTable('profiles', table => {
         table.increments()
         table.integer('user_id').notNullable().references('id').inTable('users')
         table.boolean('deleted').defaultTo(false)
+        table.timestamps()
       })
     ])
   },
@@ -55,13 +57,13 @@ module.exports = {
     ioc.alias('Adonis/Src/Validator', 'Validator')
 
     // Model
-    ioc.singleton('Conceptho/Model', () => {
+    ioc.bind('Conceptho/Model', () => {
       const AdonisModel = require('@adonisjs/lucid/src/Lucid/Model')
 
       const Model = require('../src/models/Model')(AdonisModel, ioc.use('Validator'))
-      Model.bootIfNotBooted()
+      Model._bootIfNotBooted()
 
-      return Model
+      return { Model }
     })
     ioc.alias('Conceptho/Model', 'Model')
   }

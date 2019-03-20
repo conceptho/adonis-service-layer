@@ -1,71 +1,58 @@
 const DefaultSerializer = require('../serializers/DefaultSerializer')
 
-module.exports = (AdonisModel, Validator) => class Model extends AdonisModel {
-  static boot () {
-    super.boot()
+module.exports = (AdonisModel, Validator) =>
+  class Model extends AdonisModel {
+    static boot () {
+      super.boot()
 
-    const ModelHook = require('../hooks/Model')(Validator)
+      const ModelHooks = require('../hooks/Model')(Validator)
 
-    this.addHook('beforeSave', ModelHook.sanitizeHook)
-    this.addHook('beforeSave', ModelHook.updatedAtHook)
-  }
-
-  static bootIfNotBooted () {
-    AdonisModel._bootIfNotBooted()
-
-    if (!this.$bootedBy) {
-      this.$bootedBy = []
+      this.addHook('beforeSave', ModelHooks.sanitizeHook)
+      this.addHook('beforeSave', ModelHooks.updatedAtHook)
     }
 
-    if (this.$bootedBy.indexOf(this.name) < 0) {
-      this.$bootedBy.push(this.name)
-
-      this.boot()
+    static scopeActive (query) {
+      return query.andWhere({ deleted: 0 })
     }
-  }
 
-  static scopeActive (query) {
-    return query.andWhere({ deleted: 0 })
-  }
-
-  async softDelete (transaction) {
-    this.deleted = 1
-    const affected = await this.save(transaction)
-
-    if (affected) {
-      this.freeze()
-    }
-  }
-
-  async undelete (transaction) {
-    if (this.$attributes['deleted']) {
-      this.unfreeze()
-      this.deleted = 0
-
+    async softDelete (transaction) {
+      this.deleted = 1
       const affected = await this.save(transaction)
-      return !!affected
+
+      if (affected) {
+        this.freeze()
+      }
     }
 
-    return false
-  }
+    async undelete (transaction) {
+      if (this.$attributes['deleted']) {
+        this.unfreeze()
+        this.deleted = 0
 
-  static get relations () {
-    return []
-  }
+        const affected = await this.save(transaction)
+        return !!affected
+      }
 
-  static get validationRules () {
-    return {}
-  }
+      return false
+    }
 
-  static get validationMessages () {
-    return {}
-  }
+    static get relations () {
+      return []
+    }
 
-  static get sanitizeRules () {
-    return {}
-  }
+    static get validationRules () {
+      return {}
+    }
 
-  static get Serializer () {
-    return DefaultSerializer
+    static get validationMessages () {
+      return {}
+    }
+
+    static get sanitizeRules () {
+      return {}
+    }
+
+    static get Serializer () {
+      return DefaultSerializer
+    }
   }
-}
