@@ -57,7 +57,7 @@ workflows:
   test-deploy:
     jobs:
       - test
-      - publish-coverage
+      - publish-coverage:
           requires:
             - test
           filters:
