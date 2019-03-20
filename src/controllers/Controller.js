@@ -1,6 +1,6 @@
 const Model = require('../models/Model')
 const ServiceResponse = require('../services/ServiceResponse')
-const ErrorCodeException = require('../exceptions/ErrorCodeException')
+const HttpCodeException = require('../exceptions/http/HttpCodeException')
 
 module.exports = QueryBuilder => {
   /**
@@ -52,10 +52,10 @@ module.exports = QueryBuilder => {
           return response.noContent()
         }
 
-        throw new ErrorCodeException(400, data)
+        throw new HttpCodeException(400, data)
       }
 
-      throw new ErrorCodeException(500, data)
+      throw new HttpCodeException(500, data)
     }
   }
 }
