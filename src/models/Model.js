@@ -6,8 +6,8 @@ module.exports = (AdonisModel, Validator) => class Model extends AdonisModel {
 
     const ModelHook = require('../hooks/Model')(Validator)
 
-    this.addHook('beforeUpdate', ModelHook.sanitize)
-    this.addHook('beforeUpdate', ModelHook.updateModifiedDate)
+    this.addHook('beforeSave', ModelHook.sanitizeHook)
+    this.addHook('beforeSave', ModelHook.updatedAtHook)
   }
 
   static bootIfNotBooted () {
@@ -17,7 +17,7 @@ module.exports = (AdonisModel, Validator) => class Model extends AdonisModel {
       this.$bootedBy = []
     }
 
-    if (this.$bootedBy.includes(this.name)) {
+    if (this.$bootedBy.indexOf(this.name) < 0) {
       this.$bootedBy.push(this.name)
 
       this.boot()
@@ -38,7 +38,7 @@ module.exports = (AdonisModel, Validator) => class Model extends AdonisModel {
   }
 
   async undelete (transaction) {
-    if (this.hasOwnProperty('deleted')) {
+    if (this.$attributes['deleted']) {
       this.unfreeze()
       this.deleted = 0
 
