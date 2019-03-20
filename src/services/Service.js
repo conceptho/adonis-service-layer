@@ -99,7 +99,7 @@ class Service {
       const dirtyData = pickBy(data, (value, key) => (originalModelData[key]) && (value !== originalModelData[key]))
       
       if (modelData.constructor.validationRules) {
-        return validateAll(dirtyData, pick(modelData.constructor.validationRules()), Object.keys(dirtyData));
+        return validateAll(dirtyData, pick(modelData.constructor.validationRules(), Object.keys(dirtyData)));
       }
       return true;
     }
