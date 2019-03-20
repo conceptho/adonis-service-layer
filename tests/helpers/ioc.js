@@ -1,6 +1,12 @@
 const { ioc } = require('@adonisjs/fold')
 const { Config } = require('@adonisjs/sink')
 
+/* const AppProvider = require('@adonisjs/framework/providers/AppProvider')
+
+const bootAdonis = async () => {
+
+} */
+
 const registerDatabase = (ioc, dbPath) => {
   ioc.singleton('Adonis/Src/Database', () => {
     const DatabaseManager = require('@adonisjs/lucid/src/Database/Manager')
