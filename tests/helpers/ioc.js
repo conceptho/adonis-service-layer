@@ -1,23 +1,23 @@
-const { ioc } = require('@adonisjs/fold')
 const { Config } = require('@adonisjs/sink')
 
-/* const AppProvider = require('@adonisjs/framework/providers/AppProvider')
-
-const bootAdonis = async () => {
-
-} */
-
 const registerDatabase = (ioc, dbPath) => {
-  ioc.singleton('Adonis/Src/Database', () => {
-    const DatabaseManager = require('@adonisjs/lucid/src/Database/Manager')
+  if (dbPath) {
+    ioc.singleton('Adonis/Src/Database', () => {
+      const DatabaseManager = require('@adonisjs/lucid/src/Database/Manager')
 
-    const config = new Config()
-    config.set('database', { connection: 'testing', testing: { client: 'sqlite', connection: { filename: dbPath } } })
+      const config = new Config()
+      config.set('database', { connection: 'testing', testing: { client: 'sqlite', connection: { filename: dbPath } } })
 
-    return new DatabaseManager(config)
-  })
+      return new DatabaseManager(config)
+    })
+    ioc.alias('Adonis/Src/Database', 'Database')
+  }
 
-  ioc.alias('Adonis/Src/Database', 'Database')
+  ioc.bind('Adonis/Src/QueryBuilder', () =>
+    require('@adonisjs/lucid/src/Lucid/QueryBuilder')
+  )
+
+  ioc.alias('Adonis/Src/QueryBuilder', 'QueryBuilder')
 }
 
 const registerValidator = (ioc) => {
@@ -39,7 +39,7 @@ const registerModels = (ioc) => {
   })
 }
 
-const initializeIoc = (dbPath) => {
+const initializeIoc = async (ioc, dbPath) => {
   registerDatabase(ioc, dbPath)
   registerValidator(ioc)
   registerModels(ioc)

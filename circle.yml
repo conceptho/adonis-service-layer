@@ -22,11 +22,23 @@ jobs:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
       - run:
+          name: Clear previous coverage outputs
+          command: rm -rf .nyc_output/ & rm -rf *.lcov
+      - run:
           name: Run tests
-          command: npm test
+          command: npm run coverage:test
       - persist_to_workspace:
           root: ~/repo
           paths: .
+
+  publish-coverage:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/repo
+      - run:
+          name: Publish coverage
+          command: npm run coverage:publish
 
   deploy:
     <<: *defaults
@@ -45,6 +57,12 @@ workflows:
   test-deploy:
     jobs:
       - test
+      - publish-coverage
+          requires:
+            - test
+          filters:
+            branches:
+              only: v1.0
       - deploy:
           requires:
             - test

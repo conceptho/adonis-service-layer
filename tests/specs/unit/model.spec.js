@@ -1,6 +1,6 @@
 require('@adonisjs/lucid/lib/iocResolver').setFold(require('@adonisjs/fold'))
 
-const helpers = require('../helpers')
+const helpers = require('../../helpers')
 const test = require('japa')
 const path = require('path')
 
@@ -8,11 +8,7 @@ const { setupResolver } = require('@adonisjs/sink')
 const { ioc } = require('@adonisjs/fold')
 const { pick } = require('lodash')
 
-const getUserClass = () => {
-  const { Model } = ioc.use('Conceptho/Model')
-
-  return class User extends Model { }
-}
+const userMock = require('../../mock/classes/User')
 
 test.group('base model', group => {
   group.before(async () => {
@@ -22,7 +18,7 @@ test.group('base model', group => {
     const tempDirPath = await helpers.createTempDir()
     const dbPath = path.join(tempDirPath, 'test.sqlite3')
 
-    helpers.initializeIoc(dbPath)
+    helpers.initializeIoc(ioc, dbPath)
     await helpers.createTables(ioc.use('Database'))
   })
 
@@ -37,20 +33,18 @@ test.group('base model', group => {
   })
 
   test('should be able to define a model and query it', async assert => {
-    const User = getUserClass()
+    const User = userMock(ioc)
 
     const modelData = { email: 'ahsirgashr', 'password': 'ahsiuasiuhga' }
     await User.create(modelData)
     const user = await User.first()
 
     assert.deepEqual(
-      pick(user.toJSON(), Object.keys(modelData)), modelData,
-      'the created model should match the passed model data'
-    )
+      pick(user.toJSON(), Object.keys(modelData)), modelData)
   })
 
   test('should sanitize before save', async assert => {
-    class User extends getUserClass() {
+    class User extends userMock(ioc) {
       static get sanitizeRules () {
         return {
           email: 'plural'
@@ -61,24 +55,24 @@ test.group('base model', group => {
     await User.create({ email: 'hi', password: 123 })
     const user = await User.first()
 
-    assert.equal(user.toJSON().email, 'his', 'defined sanitize rule should be applied (plural)')
+    assert.equal(user.toJSON().email, 'his')
   })
 
   test('should support soft delete', async assert => {
-    const User = getUserClass()
+    const User = userMock(ioc)
     let user = await User.create({ email: 'hi', password: 123 })
 
     user = await User.first()
-    assert.equal(user.toJSON().deleted, 0, 'default value for deleted is zero (false)')
+    assert.equal(user.toJSON().deleted, 0)
 
     await user.softDelete()
 
     user = await User.first()
-    assert.equal(user.toJSON().deleted, 1, 'after soft delete expect deleted to be 1 (true)')
+    assert.equal(user.toJSON().deleted, 1)
 
     await user.undelete()
 
     user = await User.first()
-    assert.equal(user.toJSON().deleted, 0, 'after undelete expect deleted to be 0 (false)')
+    assert.equal(user.toJSON().deleted, 0)
   })
 })
