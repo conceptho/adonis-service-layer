@@ -7,42 +7,59 @@ class ServiceLayerProvider extends ServiceProvider {
      */
     const QueryBuilder = use('@adonisjs/lucid/src/Lucid/QueryBuilder')
     const BaseRelation = use('@adonisjs/lucid/src/Lucid/Relations/BaseRelation')
+
     const Validator = use('Validator')
     const Database = use('Database')
     const AdonisModel = use('Model')
 
-    /**
-     * Service
-     */
+    this.registerModels(AdonisModel, Validator)
+    this.registerExceptions()
+    this.registerServices(Database, BaseRelation, Validator)
+    this.registerSerializers()
+    this.registerControllers(QueryBuilder)
+    this.registerMiddlewares()
+  }
+
+  registerModels (AdonisModel, Validator) {
     this.app.bind('Conceptho/Models', () => {
-      const model = require('../models/Model')(AdonisModel, Validator)
-      model.bootIfNotBooted()
+      const Model = require('../models/Model')(AdonisModel, Validator)
+      Model._bootIfNotBooted()
 
-      return { Model: model }
+      return { Model }
     })
+  }
 
+  registerExceptions () {
     this.app.bind('Conceptho/Exceptions', () => ({
       HttpCodeException: require('../exceptions/user/HttpCodeException'),
       ServiceException: require('../exceptions/runtime/ServiceException')
     }))
+  }
 
+  registerServices (Database, BaseRelation, Validator) {
     this.app.bind('Conceptho/Services', () => {
-      const Model = require('../models/Model')(AdonisModel, Validator)
+      const { Model } = this.app.use('Conceptho/Models')
 
       return {
         Service: require('../services/Service')(Database, BaseRelation, Validator, Model),
         ServiceResponse: require('../services/ServiceResponse')
       }
     })
+  }
 
+  registerSerializers () {
     this.app.bind('Conceptho/Serializers', () => ({
       DefaultSerializer: require('../serializers/DefaultSerializer')
     }))
+  }
 
+  registerControllers (QueryBuilder) {
     this.app.bind('Conceptho/Controllers', () => ({
       Controller: require('../controllers/Controller')(QueryBuilder)
     }))
+  }
 
+  registerMiddlewares () {
     this.app.bind('Conceptho/Middlewares/UseTransaction', () =>
       require('../middlewares/UseTransaction')
     )

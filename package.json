@@ -25,8 +25,8 @@
     "access": "public"
   },
   "scripts": {
-    "eslint:check": "eslint src/**/*.js",
-    "eslint:fix": "eslint src/**/*.js --fix",
+    "eslint:check": "eslint ./",
+    "eslint:fix": "eslint ./ --fix",
     "test": "node japaFile.js"
   },
   "devDependencies": {
@@ -55,6 +55,9 @@
     }
   },
   "lint-staged": {
-    "*.js": "eslint --fix"
+    "*.js": [
+      "eslint --fix",
+      "git add"
+    ]
   }
 }
