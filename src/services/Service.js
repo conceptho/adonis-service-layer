@@ -3,6 +3,8 @@ const Database = use('Database');
 const BaseRelation = use('@adonisjs/lucid/src/Lucid/Relations/BaseRelation');
 const { validateAll } = use('Validator');
 
+const { pickBy, pick } = require('lodash')
+
 const Model = require('../models/Model');
 const ServiceResponse = require('../services/ServiceResponse');
 
@@ -92,8 +94,12 @@ class Service {
 
   async validateData({ modelData = {} }) {
     if (modelData instanceof Model) {
+      const { $attributes: data, $originalAttributes: originalModelData } = modelData
+      
+      const dirtyData = pickBy(data, (value, key) => (originalModelData[key]) && (value !== originalModelData[key]))
+      
       if (modelData.constructor.validationRules) {
-        return validateAll(modelData.toJSON(), modelData.constructor.validationRules());
+        return validateAll(dirtyData, pick(modelData.constructor.validationRules()), Object.keys(dirtyData));
       }
       return true;
     }
