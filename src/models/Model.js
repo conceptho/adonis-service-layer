@@ -55,6 +55,10 @@ class Model extends AdonisModel {
     return {};
   }
 
+  static get validationMessages () {
+    return {}
+  }
+
   static get Serializer() {
     return DefaultSerializer;
   }
