@@ -1,5 +1,5 @@
 const { LogicalException } = require('@adonisjs/generic-exceptions')
-const defaultMessages = require('./defaultMessages')
+const defaultMessages = require('./httpCodeMessages')
 
 /**
  * Handle an error with given code, returning any payload to the response.
