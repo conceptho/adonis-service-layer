@@ -6,7 +6,7 @@ const path = require('path')
 
 const { setupResolver } = require('@adonisjs/sink')
 const { ioc } = require('@adonisjs/fold')
-const { pick } = require('lodash')
+const { pick, range } = require('lodash')
 
 const userMock = require('../../mock/classes/User')
 
@@ -75,4 +75,29 @@ test.group('base model', group => {
     user = await User.first()
     assert.equal(user.toJSON().deleted, 0)
   })
+
+  test('should implement scope active', async assert => {
+    const User = userMock(ioc)
+
+    await Promise.all(range(0, 18).map(v =>
+      User.create({ email: `${v}`, password: `${v}`, deleted: 1 })
+    ))
+
+    await User.create({ email: `${1}`, password: `${1}`, deleted: 0 })
+
+    const [count] = await User.query().active().count()
+    assert.equal(count['count(*)'], 1)
+  })
+
+  test('should implement static get method relations', assert =>
+    assert.isDefined(userMock(ioc).relations)
+  )
+
+  test('should implement static get method validationRules', assert =>
+    assert.isDefined(userMock(ioc).validationRules)
+  )
+
+  test('should implement static get method validationMessages', assert =>
+    assert.isDefined(userMock(ioc).validationRules)
+  )
 })
