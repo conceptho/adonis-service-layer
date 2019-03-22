@@ -60,6 +60,10 @@ module.exports = (AdonisModel, Validator) =>
       return {}
     }
 
+    static get validationMessages () {
+      return {}
+    }
+
     static get Serializer() {
       return DefaultSerializer;
     }
