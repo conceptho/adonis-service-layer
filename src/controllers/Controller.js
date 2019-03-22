@@ -1,8 +1,7 @@
-const Model = require('../models/Model')
 const ServiceResponse = require('../services/ServiceResponse')
 const HttpCodeException = require('../exceptions/http/HttpCodeException')
 
-module.exports = QueryBuilder => {
+module.exports = (ConcepthoModel, QueryBuilder) => {
   /**
    *  Default Controller
    */
@@ -21,7 +20,7 @@ module.exports = QueryBuilder => {
       if (expandArray && expandArray instanceof Array) {
         expandArray = [...new Set(expandArray)].filter(value => !blackList.includes(value) && whiteList.includes(value))
 
-        if (expandedData instanceof Model) {
+        if (expandedData instanceof ConcepthoModel) {
           return data.loadMany(expandArray)
         }
 
