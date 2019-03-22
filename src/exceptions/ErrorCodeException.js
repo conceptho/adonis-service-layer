@@ -13,12 +13,14 @@ class ErrorCodeException extends LogicalException {
   handle({ code, message, payload }, { response, trx }) {
     const { response: { statusCode } } = response
 
-    if (statusCode >= 400) {
-      await trx.rollback();
-    } else {
-      await trx.commit();
+    if (trx) {
+      if (statusCode >= 400) {
+        await trx.rollback();
+      } else {
+        await trx.commit();
+      }
     }
-    
+
     return response.status(code).send({ message, payload });
   }
 }
