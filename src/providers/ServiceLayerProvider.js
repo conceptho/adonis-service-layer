@@ -36,7 +36,9 @@ class ServiceLayerProvider extends ServiceProvider {
     });
 
     this.app.bind('Conceptho/Services', () => {
-      const Service = require('../services/Service');
+      const AdonisModel = use('Model')
+
+      const Service = require('../services/Service')(AdonisModel);
       const ServiceResponse = require('../services/ServiceResponse');
 
       return { Service, ServiceResponse };

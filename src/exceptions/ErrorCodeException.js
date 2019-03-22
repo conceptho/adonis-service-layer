@@ -10,7 +10,7 @@ class ErrorCodeException extends LogicalException {
     this.message = message || defaultMessages[code];
   }
 
-  handle({ code, message, payload }, { response, trx }) {
+  async handle({ code, message, payload }, { response, trx }) {
     const { response: { statusCode } } = response
 
     if (trx) {
