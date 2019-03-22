@@ -10,7 +10,7 @@ class ServiceLayerProvider extends ServiceProvider {
     this.app.bind('Conceptho/Middlewares/HeaderPagination', () => require('../middlewares/HeaderPagination'));
 
     this.app.bind('Conceptho/Models', () => {
-      const Model = require('../models/Model')(app.use('Model'), app.use('Validator'));
+      const Model = require('../models/Model')(this.app.use('Model'), this.app.use('Validator'));
       Model._bootIfNotBooted();
 
       return { Model };
