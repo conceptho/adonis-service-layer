@@ -1,67 +1,70 @@
-const AdonisModel = use('Model');
 const DefaultSerializer = require('../serializers/DefaultSerializer');
 
-class Model extends AdonisModel {
-  static boot() {
-    super.boot();
+module.exports = (AdonisModel, Validator) =>
+  class Model extends AdonisModel {
+    static boot() {
+      super.boot();
 
-    const updateDateHook = require('./Hooks/updateDate')
+      const ModelHooks = require('../hooks/Model')(Validator)
 
-    this.addHook('beforeUpdate', updateDateHook);
-  }
-
-  static _bootIfNotBooted() {
-    if (!this.$bootedBy) {
-      this.$bootedBy = [];
+      this.addHook('beforeSave', ModelHooks.sanitizeHook)
+      this.addHook('beforeSave', ModelHooks.updatedAtHook)
     }
 
-    if (this.$bootedBy.indexOf(this.name) < 0) {
-      this.$bootedBy.push(this.name);
+    static _bootIfNotBooted() {
+      if (!this.$bootedBy) {
+        this.$bootedBy = [];
+      }
 
-      this.boot();
+      if (this.$bootedBy.indexOf(this.name) < 0) {
+        this.$bootedBy.push(this.name);
+
+        this.boot();
+      }
     }
-  }
 
-  static scopeActive(query) {
-    return query.andWhere({ deleted: 0 });
-  }
-
-  async softDelete(transaction) {
-    this.deleted = 1;
-    const affected = await this.save(transaction);
-
-    if (affected > 0) {
-      this.freeze();
+    static scopeActive(query) {
+      return query.andWhere({ deleted: 0 });
     }
-  }
 
-  async undelete(transaction) {
-    if (this.hasOwnProperty('deleted')) {
-      this.unfreeze();
-      this.deleted = 0;
-
+    async softDelete(transaction) {
+      this.deleted = 1;
       const affected = await this.save(transaction);
-      return !!affected;
+
+      if (affected > 0) {
+        this.freeze();
+      }
     }
 
-    return false;
-  }
+    async undelete(transaction) {
+      if (this.hasOwnProperty('deleted')) {
+        this.unfreeze();
+        this.deleted = 0;
 
-  static relations() {
-    return [];
-  }
+        const affected = await this.save(transaction);
+        return !!affected;
+      }
 
-  static validationRules() {
-    return {};
-  }
+      return false;
+    }
 
-  static get validationMessages () {
-    return {}
-  }
+    static relations() {
+      return [];
+    }
 
-  static get Serializer() {
-    return DefaultSerializer;
-  }
-}
+    static validationRules() {
+      return {};
+    }
 
-module.exports = Model;
+    static get sanitizeRules () {
+      return {}
+    }
+
+    static get validationMessages () {
+      return {}
+    }
+
+    static get Serializer() {
+      return DefaultSerializer;
+    }
+  }
