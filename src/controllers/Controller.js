@@ -54,6 +54,22 @@ class Controller {
 
     throw new ErrorCodeException(500, data);
   }
+
+  async verifyViewServiceResponse({ 
+    response, 
+    serviceResponse, 
+    redirectParamWhenIsOk = 'back', 
+    redirectParamWhenItsNot = 'back', 
+    callbackWhenIsNotOk = async () => {},
+    callbackWhenIsOk = async () => {} }) {
+      try {
+        await this.verifyServiceResponse({ response, serviceResponse, callbackWhenIsOk })
+        return response.redirect(redirectParamWhenIsOk)
+      } catch(e) {
+        await callbackWhenIsNotOk(serviceResponse.data)
+        return response.status(e.code).redirect(redirectParamWhenItsNot)
+      }
+    }
 }
 
 module.exports = Controller;
