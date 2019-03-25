@@ -4,8 +4,8 @@ function createTables (ioc) {
   return Promise.all([
     Database.schema.createTable('users', table => {
       table.increments()
-      table.string('email').notNullable()
-      table.string('password').notNullable()
+      table.string('email')
+      table.string('password')
       table.boolean('deleted').defaultTo(false)
       table.timestamps()
     }),

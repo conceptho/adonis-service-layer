@@ -9,7 +9,7 @@ module.exports = (ConcepthoModel, QueryBuilder) => {
     /**
      * Expand the relations of a model
      */
-    applyExpand ({ data, expand, blackList = [], whiteList = [] }) {
+    async applyExpand ({ data, expand, blackList = [], whiteList = [] }) {
       let expandArray = expand
       let expandedData = data
 
@@ -28,20 +28,20 @@ module.exports = (ConcepthoModel, QueryBuilder) => {
           for (const i in expandArray) {
             expandedData = expandedData.with(expandArray[i])
           }
+
+          return expandedData.fetch()
         }
       }
-
-      return expandedData
     }
 
     /**
      * Verify a response returned by a Service.
      */
     async verifyServiceResponse ({ response, serviceResponse, callback = async () => { } }) {
-      const { success, data } = serviceResponse
+      const { error, data } = serviceResponse
 
       if (serviceResponse instanceof ServiceResponse) {
-        if (success) {
+        if (!error) {
           if (data) {
             await callback(data)
 

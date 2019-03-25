@@ -7,7 +7,7 @@ module.exports = (Database, BaseRelation, Validator, Model) =>
       if (!(model instanceof Model)) {
         throw new ServiceException(
           `Expected this service to handle a Conceptho/Models/Model.
-            Expected: ${Model.constructor.name}
+            Expected: ${Model.name}
             Given: ${model.constructor.name}`
         )
       }
@@ -19,14 +19,14 @@ module.exports = (Database, BaseRelation, Validator, Model) =>
      * Creates and persists a new entity handled by this service in the database.
      */
     async create ({ modelData, transaction }) {
-      const { success, data, metaData } = await this.validateModelData({ modelData })
+      const { error, data, metaData } = await this.validateModelData({ modelData })
 
-      if (success) {
+      if (!error) {
         const createdModel = await this.$model.create(data, transaction)
 
-        return new ServiceResponse({ success, data: createdModel })
+        return new ServiceResponse({ error, data: createdModel })
       }
-      return new ServiceResponse({ success, metaData })
+      return new ServiceResponse({ error, metaData })
     }
 
     /**
@@ -38,16 +38,16 @@ module.exports = (Database, BaseRelation, Validator, Model) =>
         .first()
 
       if (modelInstance) {
-        return new ServiceResponse({ success: true, data: modelInstance })
+        return new ServiceResponse({ error: false, data: modelInstance })
       }
 
-      const { success, data, metaData } = await this.create({ modelData, transaction })
+      const { error, data, metaData } = await this.create({ modelData, transaction })
 
-      if (success) {
-        return new ServiceResponse({ success, data })
+      if (!error) {
+        return new ServiceResponse({ error, data })
       }
 
-      return new ServiceResponse({ success, metaData })
+      return new ServiceResponse({ error, metaData })
     }
 
     async update ({ modelInstance, transaction }) {

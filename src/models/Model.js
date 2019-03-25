@@ -25,15 +25,11 @@ module.exports = (AdonisModel, Validator) =>
     }
 
     async undelete (transaction) {
-      if (this.$attributes['deleted']) {
-        this.unfreeze()
-        this.deleted = 0
+      this.unfreeze()
+      this.deleted = 0
 
-        const affected = await this.save(transaction)
-        return !!affected
-      }
-
-      return false
+      const affected = await this.save(transaction)
+      return !!affected
     }
 
     static get relations () {

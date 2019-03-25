@@ -10,6 +10,28 @@ test.group('base model', group => {
   group.before(async () => {
     this.ioc = await helpers.setup(ioc)
     this.classMocker = require('../../mock/classes')(this.ioc)
+
+    const { Model } = this.classMocker
+
+    this.ioc.fake('App/Models/User', () =>
+      class User extends Model {
+        profile () {
+          return this.hasOne('App/Models/Profile')
+        }
+
+        static get sanitizeRules () {
+          return {
+            password: 'plural'
+          }
+        }
+      })
+
+    this.ioc.fake('App/Models/Profile', () =>
+      class Profile extends Model {
+        user () {
+          return this.belongsTo('App/Models/User')
+        }
+      })
   })
 
   group.afterEach(async () => {
@@ -23,34 +45,38 @@ test.group('base model', group => {
   })
 
   test('should be able to define a model and query it', async assert => {
-    const User = this.classMocker.User
+    const User = this.ioc.use('App/Models/User')
 
-    const modelData = { email: 'ahsirgashr', 'password': 'ahsiuasiuhga' }
+    const modelData = { email: 'ahsirgashr', password: 'ahsirgashrs' }
     await User.create(modelData)
     const user = await User.first()
 
     assert.deepEqual(pick(user.toJSON(), Object.keys(modelData)), modelData)
   })
 
-  test.failing('should be able to query related data')
+  test('should be able to query related data', async assert => {
+    const User = this.ioc.use('App/Models/User')
+    const Profile = this.ioc.use('App/Models/Profile')
+
+    const user = await User.create({ email: '1234' })
+    await Profile.create({ user_id: user.id })
+
+    const userProfile = await user.profile().fetch()
+    assert.deepEqual(pick(userProfile.toJSON(), 'user_id'), { user_id: user.id })
+  })
 
   test('should sanitize before save', async assert => {
-    class User extends this.classMocker.User {
-      static get sanitizeRules () {
-        return {
-          email: 'plural'
-        }
-      }
-    }
+    const User = this.ioc.use('App/Models/User')
 
-    await User.create({ email: 'hi', password: 123 })
+    await User.create({ email: 'hi', password: 'hi' })
+
     const user = await User.first()
 
-    assert.equal(user.toJSON().email, 'his')
+    assert.equal(user.toJSON().password, 'his')
   })
 
   test('should support soft delete', async assert => {
-    const User = this.classMocker.User
+    const User = this.ioc.use('App/Models/User')
     let user = await User.create({ email: 'hi', password: 123 })
 
     user = await User.first()
@@ -68,9 +94,9 @@ test.group('base model', group => {
   })
 
   test('should implement scope active', async assert => {
-    const User = this.classMocker.User
+    const User = this.ioc.use('App/Models/User')
 
-    await Promise.all(range(0, 18).map(v =>
+    await Promise.all(range(0, 19).map(v =>
       User.create({ email: `${v}`, password: `${v}`, deleted: 1 })
     ))
 
@@ -81,14 +107,10 @@ test.group('base model', group => {
   })
 
   test('should implement static get method relations', assert =>
-    assert.isDefined(this.classMocker.User.relations)
+    assert.isDefined(this.ioc.use('App/Models/User').relations)
   )
 
   test('should implement static get method validationRules', assert =>
-    assert.isDefined(this.classMocker.User.validationRules)
-  )
-
-  test('should implement static get method validationMessages', assert =>
-    assert.isDefined(this.classMocker.User.validationRules)
+    assert.isDefined(this.ioc.use('App/Models/User').validationRules)
   )
 })

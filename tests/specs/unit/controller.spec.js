@@ -12,17 +12,29 @@ test.group('controller', group => {
 
     const { Model } = this.classMocker
 
-    this.ioc.fake('App/Models/User', () => class User extends Model {
-      profile () {
-        return this.hasOne('App/Models/Profile')
-      }
-    })
+    this.ioc.fake('App/Models/User', () =>
+      class User extends Model {
+        profile () {
+          return this.hasOne('App/Models/Profile')
+        }
+      })
 
-    this.ioc.fake('App/Models/Profile', () => class Profile extends Model {
-      user () {
-        return this.belongsTo('App/Models/User')
-      }
-    })
+    this.ioc.fake('App/Models/Profile', () =>
+      class Profile extends Model {
+        user () {
+          return this.belongsTo('App/Models/User')
+        }
+      })
+  })
+
+  group.beforeEach(async () => {
+    const user = await this.ioc.use('App/Models/User').create({ email: '132', password: '132' })
+    await this.ioc.use('App/Models/Profile').create({ user_id: user.id })
+  })
+
+  group.afterEach(async () => {
+    await this.ioc.use('Database').truncate('profiles')
+    await this.ioc.use('Database').truncate('users')
   })
 
   group.after(async () => {
@@ -46,17 +58,46 @@ test.group('controller', group => {
     const { Controller } = this.classMocker
 
     const User = this.ioc.use('App/Models/User')
-    const Profile = this.ioc.use('App/Models/Profile')
 
-    let user = await User.create({ email: '132', password: '132' })
-    await Profile.create({ user_id: user.id })
-
-    user = await User.first()
+    const user = await User.first()
     const controller = new Controller()
 
     await controller.applyExpand({ data: user, expand: 'profile', whiteList: ['profile'] })
     assert.isDefined(user.$relations.profile)
   })
 
-  test.failing('applyExpand should handle a QueryBuilder instance')
+  test('applyExpand should not load property if it is listed on a blackList', async assert => {
+    const { Controller } = this.classMocker
+
+    const User = this.ioc.use('App/Models/User')
+
+    const controller = new Controller()
+    const user = await User.first()
+
+    await controller.applyExpand({ data: user, expand: 'profile', blackList: ['profile'] })
+    assert.strictEqual(user.$relations.profile, undefined)
+  })
+
+  test('applyExpand blackList should prevail if a property is also listed on a whiteList ', async assert => {
+    const { Controller } = this.classMocker
+
+    const User = this.ioc.use('App/Models/User')
+
+    const controller = new Controller()
+    const user = await User.first()
+
+    await controller.applyExpand({ data: user, expand: 'profile', blackList: ['profile'], whilteList: ['profile'] })
+    assert.strictEqual(user.$relations.profile, undefined)
+  })
+
+  test('applyExpand should handle a QueryBuilder instance', async assert => {
+    const { Controller } = this.classMocker
+
+    const User = this.ioc.use('App/Models/User')
+
+    const controller = new Controller()
+    const result = await controller.applyExpand({ data: User.query(), expand: 'profile', whilteList: ['profile'] })
+
+    assert.isArray(result.rows)
+  })
 })
