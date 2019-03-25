@@ -1,5 +1,5 @@
 const ServiceResponse = require('../services/ServiceResponse')
-const ServiceException = require('../exceptions/runtime/ServiceException')
+const { ServiceException, ValidationException } = require('../exceptions/runtime')
 
 module.exports = (Database, BaseRelation, Validator, Model) =>
   class Service {
@@ -22,10 +22,17 @@ module.exports = (Database, BaseRelation, Validator, Model) =>
       const { error, data, metaData } = await this.validateModelData({ modelData })
 
       if (!error) {
-        const createdModel = await this.$model.create(data, trx)
+        let createdModel = null
 
-        return new ServiceResponse({ error, data: createdModel })
+        try {
+          createdModel = await this.$model.create(data, trx)
+        } catch (newError) {
+          return new ServiceResponse({ error: newError, data: createdModel })
+        }
+
+        return new ServiceResponse({ data: createdModel })
       }
+
       return new ServiceResponse({ error, metaData })
     }
 
@@ -126,18 +133,22 @@ module.exports = (Database, BaseRelation, Validator, Model) =>
 
     /**
      * Validate model data.
-     * @returns {ServiceResponse} A ServiceResponse.
+     * @returns {ServiceResponse} Response.
      */
     async validateModelData ({ modelData }) {
       const validationMessages = modelData.validationMessages || this.$model.validationMessages
       const validationRules = modelData.validationRules || this.$model.validationRules
       const validation = await Validator.validateAll(modelData, validationRules, validationMessages)
 
+      // dirtyData
+
       if (validation.fails()) {
-        return new ServiceResponse({ error: true, metaData: validation.messages() })
+        const error = new ValidationException(`Validation failed for ${modelData}`)
+
+        return new ServiceResponse({ error, metaData: validation.messages() })
       }
 
-      return new ServiceResponse({ error: false, data: modelData })
+      return new ServiceResponse({ data: modelData })
     }
 
     async find ({ primaryKey, byActive }) {

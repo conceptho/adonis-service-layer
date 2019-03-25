@@ -3,10 +3,10 @@ require('@adonisjs/lucid/lib/iocResolver').setFold(require('@adonisjs/fold'))
 const helpers = require('../../helpers')
 const test = require('japa')
 
-const ServiceException = require('../../../src/exceptions/runtime/ServiceException')
-const ServiceResponse = require('../../../src/services/ServiceResponse')
-
+const { ServiceException, ValidationException } = require('../../../src/exceptions/runtime')
 const { ioc } = require('@adonisjs/fold')
+
+const ServiceResponse = require('../../../src/services/ServiceResponse')
 
 test.group('base service', group => {
   group.before(async () => {
@@ -71,14 +71,13 @@ test.group('base service', group => {
     const User = this.ioc.use('App/Models/User')
     const AdonisModel = this.ioc.use('Adonis/Src/Model')
 
-    class Test {}
-
     const service = new Service(User)
 
     assert.isTrue(service.$model === User)
     assert.isTrue(service.$model.prototype instanceof Model)
     assert.isTrue(service.$model.prototype instanceof AdonisModel)
 
+    class Test {}
     assert.throws(() => new Service(Test), ServiceException)
   })
 
@@ -94,7 +93,10 @@ test.group('base service', group => {
   test('should validate model data before update or save', async assert => {
     const UserService = this.ioc.use('App/Services/UserService')
 
-    const { metaData: [error] } = await UserService.create({ modelData: { email: 'hehehe' } })
-    assert.strictEqual(error.message, 'Invalid e-mail :(')
+    const { error: caseOne } = await UserService.create({ modelData: { email: 'hehehe' } })
+    assert.isTrue(caseOne.constructor === ValidationException)
+
+    const { error: caseTwo } = await UserService.create({ modelData: { email: 'test@test.com' } })
+    assert.isNull(caseTwo)
   })
 })
