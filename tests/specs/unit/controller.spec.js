@@ -5,7 +5,7 @@ const test = require('japa')
 
 const { ioc } = require('@adonisjs/fold')
 
-test.group('controller', group => {
+test.group('base controller', group => {
   group.before(async () => {
     this.ioc = await helpers.setup(ioc)
     this.classMocker = require('../../mock/classes')(this.ioc)

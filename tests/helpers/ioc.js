@@ -12,6 +12,13 @@ async function registerAdonis (ioc) {
     path.join(__dirname, '../../node_modules/@adonisjs/framework/providers/AppProvider')
   ]
 
+  ioc.bind('Adonis/Src/Model', () => {
+    const AdonisModel = require('@adonisjs/lucid/src/Lucid/Model')
+    AdonisModel._bootIfNotBooted()
+
+    return AdonisModel
+  })
+
   await registrar
     .providers(providers)
     .registerAndBoot()

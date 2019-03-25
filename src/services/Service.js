@@ -3,26 +3,26 @@ const ServiceException = require('../exceptions/runtime/ServiceException')
 
 module.exports = (Database, BaseRelation, Validator, Model) =>
   class Service {
-    constructor (model) {
-      if (!(model instanceof Model)) {
+    constructor (modelClass) {
+      if (!(modelClass.prototype instanceof Model)) {
         throw new ServiceException(
-          `Expected this service to handle a Conceptho/Models/Model.
+          `Expected this service to handle a Model.
             Expected: ${Model.name}
-            Given: ${model.constructor.name}`
+            Given: ${modelClass.constructor.name}`
         )
       }
 
-      this.$model = model
+      this.$model = modelClass
     }
 
     /**
      * Creates and persists a new entity handled by this service in the database.
      */
-    async create ({ modelData, transaction }) {
+    async create ({ modelData, trx }) {
       const { error, data, metaData } = await this.validateModelData({ modelData })
 
       if (!error) {
-        const createdModel = await this.$model.create(data, transaction)
+        const createdModel = await this.$model.create(data, trx)
 
         return new ServiceResponse({ error, data: createdModel })
       }
@@ -134,10 +134,10 @@ module.exports = (Database, BaseRelation, Validator, Model) =>
       const validation = await Validator.validateAll(modelData, validationRules, validationMessages)
 
       if (validation.fails()) {
-        return new ServiceResponse({ success: false, metaData: validation.messages })
+        return new ServiceResponse({ error: true, metaData: validation.messages() })
       }
 
-      return new ServiceResponse({ success: true, data: modelData })
+      return new ServiceResponse({ error: false, data: modelData })
     }
 
     async find ({ primaryKey, byActive }) {
