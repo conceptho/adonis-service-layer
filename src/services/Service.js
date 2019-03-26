@@ -1,5 +1,5 @@
 const ServiceResponse = require('../services/ServiceResponse')
-const { ServiceException, ValidationException } = require('../exceptions/runtime')
+const { ServiceException } = require('../exceptions/runtime')
 
 module.exports = (Database, BaseRelation, Validator, Model) =>
   class Service {
@@ -18,64 +18,57 @@ module.exports = (Database, BaseRelation, Validator, Model) =>
     /**
      * Creates and persists a new entity handled by this service in the database.
      */
-    async create ({ modelData, trx }) {
-      const { error, data, metaData } = await this.validateModelData({ modelData })
+    async create ({ model, trx }) {
+      const { error: validationError } = await model.validate()
 
-      if (!error) {
-        let createdModel = null
-
+      if (!validationError) {
         try {
-          createdModel = await this.$model.create(data, trx)
-        } catch (newError) {
-          return new ServiceResponse({ error: newError, data: createdModel })
+          const data = await model.save(trx)
+          return new ServiceResponse({ data })
+        } catch (error) {
+          return new ServiceResponse({ error })
         }
-
-        return new ServiceResponse({ data: createdModel })
       }
 
-      return new ServiceResponse({ error, metaData })
+      return new ServiceResponse({ error: validationError })
     }
 
     /**
      * Finds an entity with given where clauses or creates it if it does not exists.
      */
-    async findOrCreate ({ whereAttributes, modelData, transaction, byActive }) {
-      const modelInstance = await this.query({ byActive, transaction })
-        .where(whereAttributes)
-        .first()
+    async findOrCreate ({ whereAttributes, modelData = whereAttributes, trx, byActive = false }) {
+      const { data: modelFound, error } = await this.find({ whereAttributes, byActive })
 
-      if (modelInstance) {
-        return new ServiceResponse({ error: false, data: modelInstance })
+      if (modelFound) {
+        return new ServiceResponse({ data: modelFound })
       }
 
-      const { error, data, metaData } = await this.create({ modelData, transaction })
+      const model = new this.$model(modelData)
+      const { error: createError, data: persisted } = await this.create({ model, trx })
 
       if (!error) {
-        return new ServiceResponse({ error, data })
+        return new ServiceResponse({ data: persisted })
+      }
+
+      return new ServiceResponse({ createError })
+    }
+
+    async update ({ modelInstance, transaction }) {
+      const { error, data, metaData } = await this.validateModelData({ modelData: modelInstance })
+
+      if (!error) {
+        try {
+          await data.save(transaction)
+          return new ServiceResponse({ error, data })
+        } catch (innerError) {
+          return new ServiceResponse({ error: innerError })
+        }
       }
 
       return new ServiceResponse({ error, metaData })
     }
 
-    async update ({ modelInstance, transaction }) {
-      if (!(modelInstance instanceof this.$model)) {
-        throw ServiceException(`
-          Tried to update an object which is not handled by this Service.
-            Expected: ${this.$model.constructor.name}
-            Given: ${modelInstance.constructor.name}`
-        )
-      }
-
-      const { success, data, metaData } = await this.validateModelData({ modelData: modelInstance })
-
-      if (success) {
-        await data.save(transaction)
-        return new ServiceResponse({ success, data })
-      }
-      return new ServiceResponse({ success, metaData })
-    }
-
-    async delete ({ modelInstance, transaction, hardDelete = true }) {
+    async delete ({ modelInstance, trx, hardDelete = true }) {
       if (!(modelInstance instanceof this.$model)) {
         throw ServiceException(`
           Tried to delete an object which is not handled by this Service.
@@ -87,10 +80,10 @@ module.exports = (Database, BaseRelation, Validator, Model) =>
       if (hardDelete) {
         return this.executeTransaction({
           transaction: async trx => modelInstance.delete(trx),
-          trx: transaction
+          trx: trx
         })
       }
-      return this.softDelete({ modelInstance, trx: transaction })
+      return this.softDelete({ modelInstance, trx: trx })
     }
 
     async undelete ({ model, trx = false }) {
@@ -131,37 +124,18 @@ module.exports = (Database, BaseRelation, Validator, Model) =>
       }
     }
 
-    /**
-     * Validate model data.
-     * @returns {ServiceResponse} Response.
-     */
-    async validateModelData ({ modelData }) {
-      const validationMessages = modelData.validationMessages || this.$model.validationMessages
-      const validationRules = modelData.validationRules || this.$model.validationRules
-      const validation = await Validator.validateAll(modelData, validationRules, validationMessages)
-
-      // dirtyData
-
-      if (validation.fails()) {
-        const error = new ValidationException(`Validation failed for ${modelData}`)
-
-        return new ServiceResponse({ error, metaData: validation.messages() })
-      }
-
-      return new ServiceResponse({ data: modelData })
-    }
-
-    async find ({ primaryKey, byActive }) {
+    async find ({ whereAttributes, byActive = false }) {
       try {
-        const query = !byActive
-          ? this.$model.query().where('id', primaryKey)
-          : this.$model.query()
-            .where('id', primaryKey)
-            .active()
+        let query = this.$model.query().where(whereAttributes)
 
-        return query.first()
-      } catch (notFound) {
-        return false
+        if (byActive) {
+          query = query.active()
+        }
+
+        const data = await query.first()
+        return new ServiceResponse({ data })
+      } catch (error) {
+        return new ServiceResponse({ error })
       }
     }
 

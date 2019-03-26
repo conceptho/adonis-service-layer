@@ -108,11 +108,23 @@ test.group('base service', group => {
     const user = await User.query().where({ email: 'test@test.com ' }).first()
     assert.isNull(user)
 
-    const { data: newUser } = await UserService.findOrCreate({ whereAttributes: { email: 'test@test.com' }, modelData: { email: 'test@test.com' } })
+    const { data: newUser } = await UserService.findOrCreate({ whereAttributes: { email: 'test@test.com' }, modelData: new User({ email: 'test@test.com' }) })
     assert.isNotNull(newUser)
     assert.strictEqual(newUser.email, 'test@test.com')
 
     const { data: existingUser } = await UserService.findOrCreate({ whereAttributes: { email: 'test@test.com' } })
     assert.deepEqual(pick(existingUser.toJSON(), Object.keys(newUser.toJSON())), newUser.toJSON())
+  })
+
+  test('should implement update', async assert => {
+    const UserService = this.ioc.use('App/Services/UserService')
+    const User = this.ioc.use('App/Models/User')
+
+    const user = await User.create({ password: 123 })
+    assert.strictEqual(user.password, 123)
+
+    user.password = 321
+    await UserService.update({ modelInstance: user })
+    assert.strictEqual(user.password, 321)
   })
 })

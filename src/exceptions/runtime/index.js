@@ -1,4 +1,4 @@
-const ServiceException = require('./ValidationException')
+const ServiceException = require('./ServiceException')
 const ValidationException = require('./ValidationException')
 
 module.exports = {
