@@ -5,6 +5,7 @@ const test = require('japa')
 
 const { ServiceException, ValidationException } = require('../../../src/exceptions/runtime')
 const { ioc } = require('@adonisjs/fold')
+const { pick } = require('lodash')
 
 const ServiceResponse = require('../../../src/services/ServiceResponse')
 
@@ -50,7 +51,7 @@ test.group('base service', group => {
     this.ioc.fake('App/Services/UserService', () => {
       const { Service } = this.classMocker
 
-      class UserService extends Service {}
+      class UserService extends Service { }
 
       return new UserService(this.ioc.use('App/Models/User'))
     })
@@ -77,7 +78,7 @@ test.group('base service', group => {
     assert.isTrue(service.$model.prototype instanceof Model)
     assert.isTrue(service.$model.prototype instanceof AdonisModel)
 
-    class Test {}
+    class Test { }
     assert.throws(() => new Service(Test), ServiceException)
   })
 
@@ -98,5 +99,20 @@ test.group('base service', group => {
 
     const { error: caseTwo } = await UserService.create({ modelData: { email: 'test@test.com' } })
     assert.isNull(caseTwo)
+  })
+
+  test('should implement findOrCreate', async assert => {
+    const UserService = this.ioc.use('App/Services/UserService')
+    const User = this.ioc.use('App/Models/User')
+
+    const user = await User.query().where({ email: 'test@test.com ' }).first()
+    assert.isNull(user)
+
+    const { data: newUser } = await UserService.findOrCreate({ whereAttributes: { email: 'test@test.com' }, modelData: { email: 'test@test.com' } })
+    assert.isNotNull(newUser)
+    assert.strictEqual(newUser.email, 'test@test.com')
+
+    const { data: existingUser } = await UserService.findOrCreate({ whereAttributes: { email: 'test@test.com' } })
+    assert.deepEqual(pick(existingUser.toJSON(), Object.keys(newUser.toJSON())), newUser.toJSON())
   })
 })
