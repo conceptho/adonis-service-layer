@@ -84,8 +84,10 @@ test.group('base service', group => {
 
   test('should be able to create a related model and return a service response', async assert => {
     const UserService = this.ioc.use('App/Services/UserService')
+    const User = this.ioc.use('App/Models/User')
 
-    const response = await UserService.create({ modelData: { email: 'test@test.com' } })
+    const user = new User({ email: 'test@test.com' })
+    const response = await UserService.create({ model: user })
 
     assert.isTrue(response.constructor === ServiceResponse)
     assert.strictEqual(response.data.toJSON().email, 'test@test.com')
@@ -93,26 +95,31 @@ test.group('base service', group => {
 
   test('should validate model data before update or save', async assert => {
     const UserService = this.ioc.use('App/Services/UserService')
+    const User = this.ioc.use('App/Models/User')
 
-    const { error: caseOne } = await UserService.create({ modelData: { email: 'hehehe' } })
+    const usera = new User({ email: 'hehehe' })
+    const userb = new User({ email: 'test@test.com' })
+
+    const { error: caseOne } = await UserService.create({ model: usera })
     assert.isTrue(caseOne.constructor === ValidationException)
 
-    const { error: caseTwo } = await UserService.create({ modelData: { email: 'test@test.com' } })
+    const { error: caseTwo } = await UserService.create({ model: userb })
     assert.isNull(caseTwo)
   })
 
   test('should implement findOrCreate', async assert => {
     const UserService = this.ioc.use('App/Services/UserService')
     const User = this.ioc.use('App/Models/User')
+    const whereAttributes = { email: 'test@test.com' }
 
-    const user = await User.query().where({ email: 'test@test.com ' }).first()
+    const user = await User.query().where(whereAttributes).first()
     assert.isNull(user)
 
-    const { data: newUser } = await UserService.findOrCreate({ whereAttributes: { email: 'test@test.com' }, modelData: new User({ email: 'test@test.com' }) })
+    const { data: newUser } = await UserService.findOrCreate({ whereAttributes })
     assert.isNotNull(newUser)
     assert.strictEqual(newUser.email, 'test@test.com')
 
-    const { data: existingUser } = await UserService.findOrCreate({ whereAttributes: { email: 'test@test.com' } })
+    const { data: existingUser } = await UserService.findOrCreate({ whereAttributes })
     assert.deepEqual(pick(existingUser.toJSON(), Object.keys(newUser.toJSON())), newUser.toJSON())
   })
 
@@ -124,7 +131,7 @@ test.group('base service', group => {
     assert.strictEqual(user.password, 123)
 
     user.password = 321
-    await UserService.update({ modelInstance: user })
+    await UserService.update({ model: user })
     assert.strictEqual(user.password, 321)
   })
 })

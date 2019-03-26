@@ -23,8 +23,8 @@ module.exports = (Database, BaseRelation, Validator, Model) =>
 
       if (!validationError) {
         try {
-          const data = await model.save(trx)
-          return new ServiceResponse({ data })
+          await model.save(trx)
+          return new ServiceResponse({ data: model })
         } catch (error) {
           return new ServiceResponse({ error })
         }
@@ -37,35 +37,35 @@ module.exports = (Database, BaseRelation, Validator, Model) =>
      * Finds an entity with given where clauses or creates it if it does not exists.
      */
     async findOrCreate ({ whereAttributes, modelData = whereAttributes, trx, byActive = false }) {
-      const { data: modelFound, error } = await this.find({ whereAttributes, byActive })
+      const { data: modelFound } = await this.find({ whereAttributes, byActive })
 
       if (modelFound) {
         return new ServiceResponse({ data: modelFound })
       }
 
-      const model = new this.$model(modelData)
-      const { error: createError, data: persisted } = await this.create({ model, trx })
+      const newModel = new this.$model(modelData)
+      const { error: createError, data: persisted } = await this.create({ model: newModel, trx })
 
-      if (!error) {
+      if (!createError) {
         return new ServiceResponse({ data: persisted })
       }
 
       return new ServiceResponse({ createError })
     }
 
-    async update ({ modelInstance, transaction }) {
-      const { error, data, metaData } = await this.validateModelData({ modelData: modelInstance })
+    async update ({ model, trx }) {
+      const { error: validationError } = await model.validate()
 
-      if (!error) {
+      if (!validationError) {
         try {
-          await data.save(transaction)
-          return new ServiceResponse({ error, data })
+          await model.save(trx)
+          return new ServiceResponse({ model })
         } catch (innerError) {
           return new ServiceResponse({ error: innerError })
         }
       }
 
-      return new ServiceResponse({ error, metaData })
+      return new ServiceResponse({ error: validationError })
     }
 
     async delete ({ modelInstance, trx, hardDelete = true }) {
@@ -132,7 +132,8 @@ module.exports = (Database, BaseRelation, Validator, Model) =>
           query = query.active()
         }
 
-        const data = await query.first()
+        const data = await query.firstOrFail()
+
         return new ServiceResponse({ data })
       } catch (error) {
         return new ServiceResponse({ error })

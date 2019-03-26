@@ -1,5 +1,6 @@
 const DefaultSerializer = require('../serializers/DefaultSerializer')
 
+const { ValidationException } = require('../exceptions/runtime')
 const { pickBy, pick } = require('lodash')
 
 module.exports = (AdonisModel, Validator) =>
@@ -86,9 +87,9 @@ module.exports = (AdonisModel, Validator) =>
       }
 
       if (validation.fails()) {
-        return { error: true, messages: validation.messages() }
+        return { error: new ValidationException('Validation failed.'), messages: validation.messages() }
       }
 
-      return { error: false }
+      return { error: null, messages: null }
     }
   }
