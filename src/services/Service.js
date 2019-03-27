@@ -1,6 +1,8 @@
 const ServiceResponse = require('../services/ServiceResponse')
 const { ServiceException } = require('../exceptions/runtime')
 
+const { reduce } = require('lodash')
+
 module.exports = (Database, BaseRelation, Validator, Model) =>
   class Service {
     constructor (modelClass) {
@@ -17,24 +19,33 @@ module.exports = (Database, BaseRelation, Validator, Model) =>
 
     /**
      * Creates and persists a new entity handled by this service in the database.
+     *
+     * @param {Object} param
+     * @param {Model} param.model Model instance
+     * @param {Transaction} param.trx Knex transaction
      */
     async create ({ model, trx }) {
-      const { error: validationError } = await model.validate()
+      const validationException = await model.validate()
 
-      if (!validationError) {
-        try {
+      if (!validationException) {
+        return this.executeCallback(async () => {
           await model.save(trx)
-          return new ServiceResponse({ data: model })
-        } catch (error) {
-          return new ServiceResponse({ error })
-        }
+
+          return model
+        })
       }
 
-      return new ServiceResponse({ error: validationError })
+      return new ServiceResponse({ error: validationException })
     }
 
     /**
      * Finds an entity with given where clauses or creates it if it does not exists.
+     *
+     * @param {Object} param
+     * @param {Object} whereAttributes Values to look for
+     * @param {Object} modelData If entity is not found, create a new matching this modelData. Defaults to whereAttributes
+     * @param {Transaction} param.trx Knex transaction
+     * @param {Object} params.byActive If true, filter only active records
      */
     async findOrCreate ({ whereAttributes, modelData = whereAttributes, trx, byActive = false }) {
       const { data: modelFound } = await this.find({ whereAttributes, byActive })
@@ -44,123 +55,108 @@ module.exports = (Database, BaseRelation, Validator, Model) =>
       }
 
       const newModel = new this.$model(modelData)
-      const { error: createError, data: persisted } = await this.create({ model: newModel, trx })
-
-      if (!createError) {
-        return new ServiceResponse({ data: persisted })
-      }
-
-      return new ServiceResponse({ createError })
+      return this.create({ model: newModel, trx })
     }
 
+    /**
+     * Updates an entity
+     *
+     * @param {Object} param
+     * @param {Model} param.model Model instance
+     * @param {Transaction} param.trx Knex transaction
+     */
     async update ({ model, trx }) {
-      const { error: validationError } = await model.validate()
+      const validationException = await model.validate()
 
-      if (!validationError) {
-        try {
+      if (!validationException) {
+        return this.executeCallback(async () => {
           await model.save(trx)
-          return new ServiceResponse({ model })
-        } catch (innerError) {
-          return new ServiceResponse({ error: innerError })
-        }
-      }
 
-      return new ServiceResponse({ error: validationError })
-    }
-
-    async delete ({ modelInstance, trx, hardDelete = true }) {
-      if (!(modelInstance instanceof this.$model)) {
-        throw ServiceException(`
-          Tried to delete an object which is not handled by this Service.
-            Expected: ${this.$model.constructor.name}
-            Given: ${modelInstance.constructor.name}`
-        )
-      }
-
-      if (hardDelete) {
-        return this.executeTransaction({
-          transaction: async trx => modelInstance.delete(trx),
-          trx: trx
+          return model
         })
       }
-      return this.softDelete({ modelInstance, trx: trx })
+
+      return new ServiceResponse({ error: validationException })
     }
 
+    /**
+     * Deletes an entity
+     *
+     * @param {Object} param
+     * @param {Model} param.model Model instance
+     * @param {Boolean} softDelete If true, performs a soft delete. Defaults to false
+     * @throws {ServiceException} If model doesnt support softDelete and it is required
+     */
+    async delete ({ model, trx }, softDelete) {
+      if (softDelete) {
+        return this.executeCallback(async () => {
+          await model.softDelete(trx)
+
+          return model
+        })
+      }
+
+      return this.executeCallback(async () => {
+        await model.delete(trx)
+
+        return model
+      })
+    }
+
+    /**
+     *  Undelete a model if it supports softDelete
+     *
+     * @param {Object} param
+     */
     async undelete ({ model, trx = false }) {
-      return this.executeTransaction({
-        transaction: async trx => model.undelete(trx),
-        trx
+      return this.executeCallback(async () => {
+        await model.undelete(trx)
+
+        return model
       })
     }
 
-    async softDelete ({ model, trx }) {
-      if (model.deleted === 1) {
-        return new ServiceResponse(false, [
-          {
-            error: 'Entidade não encontrada',
-            message: 'A entidade já foi deletada'
-          }
-        ])
-      }
-
-      return this.executeTransaction({
-        transaction: async trx => model.safeDelete(trx),
-        trx
-      })
-    }
-
-    async executeTransaction ({ transaction, trx }) {
-      try {
-        const data = await transaction(trx)
-        return new ServiceResponse(true, data)
-      } catch (e) {
-        const data = [
-          {
-            message: e.message,
-            error: e
-          }
-        ]
-        return new ServiceResponse(false, data)
-      }
-    }
-
+    /**
+     * Finds an entity if it exists and returns it.
+     *
+     * @param {Object} params
+     * @param {Object} params.whereAttributes Values to look for
+     * @param {Object} params.byActive If true, filter only active records
+     * @returns {ServiceResponse} Response
+     */
     async find ({ whereAttributes, byActive = false }) {
-      try {
-        let query = this.$model.query().where(whereAttributes)
+      let query = this.$model.query().where(whereAttributes)
 
-        if (byActive) {
-          query = query.active()
-        }
-
-        const data = await query.firstOrFail()
-
-        return new ServiceResponse({ data })
-      } catch (error) {
-        return new ServiceResponse({ error })
+      if (byActive) {
+        query = query.active()
       }
+
+      return this.executeCallback(async () => query.firstOrFail())
     }
 
-    query ({ byActive, transaction } = {}) {
+    /**
+     * Returns a new QuryBuilder instance
+     *
+     * @param {*} param
+     */
+    query ({ byActive, trx } = {}) {
       const query = this.$model.query()
-      if (transaction) {
-        query.transacting(transaction)
+
+      if (trx) {
+        query.transacting(trx)
       }
-      return !byActive ? query : query.active()
+
+      return byActive ? query.active() : query
     }
 
-    checkResponses ({ responses = {}, data }) {
-      let isOk = true
-      const responsesData = {}
-      const errors = {}
+    checkResponses ({ responses = [], data }) {
+      const errors = reduce(responses, (res, value) => value.error ? [...res, value.error] : res, [])
+      const responsesData = reduce(responses, (res, value) => value.data ? [...res, value.data] : [...res, null], [])
 
-      for (const key in responses) {
-        isOk = isOk && responses[key].isOk
-        if (!responses[key].isOk) {
-          errors[key] = responses[key].data
-        }
-        responsesData[key] = responses[key].data
-      }
-      return new ServiceResponse(isOk, isOk ? data || responsesData : errors, responsesData)
+      return new ServiceResponse({
+        error: errors.length ? errors : null,
+        data: data || (responsesData.length ? responsesData : null)
+      })
     }
 
     async finalizeTransaction ({ isOk, trx, callbackAfterCommit = () => { }, restart = false }) {
@@ -179,6 +175,21 @@ module.exports = (Database, BaseRelation, Validator, Model) =>
     applyTransactionToRelation ({ relation, trx }) {
       if (trx && relation instanceof BaseRelation) {
         relation.relatedQuery.transacting(trx)
+      }
+    }
+
+    /**
+     * Wraps a callback with a try/catch block and returns a ServiceResponse.
+     *
+     * @param {Function} callback
+     * @param {*} trx Knex transaction
+     * @returns {ServiceResponse}
+     */
+    async executeCallback (callback, trx) {
+      try {
+        return new ServiceResponse({ data: await callback(trx) })
+      } catch (error) {
+        return new ServiceResponse({ error })
       }
     }
   }

@@ -82,7 +82,7 @@ test.group('base service', group => {
     assert.throws(() => new Service(Test), ServiceException)
   })
 
-  test('should be able to create a related model and return a service response', async assert => {
+  test('should be able to create a related model', async assert => {
     const UserService = this.ioc.use('App/Services/UserService')
     const User = this.ioc.use('App/Models/User')
 
@@ -107,6 +107,25 @@ test.group('base service', group => {
     assert.isNull(caseTwo)
   })
 
+  test('should implement find', async assert => {
+    const UserService = this.ioc.use('App/Services/UserService')
+    const User = this.ioc.use('App/Models/User')
+    const whereAttributes = { email: 'test@test.com' }
+
+    const user = await User.query().where(whereAttributes).first()
+    assert.isNull(user)
+
+    await UserService.create({ model: new User(whereAttributes) })
+
+    const { data: newUser } = await UserService.find({ whereAttributes })
+    assert.isNotNull(newUser)
+    assert.strictEqual(newUser.toJSON().email, 'test@test.com')
+
+    const { data: unexistentUser, error: { name: notFound } } = await UserService.find({ whereAttributes: { email: 'oops' } })
+    assert.isNull(unexistentUser)
+    assert.equal(notFound, 'ModelNotFoundException')
+  })
+
   test('should implement findOrCreate', async assert => {
     const UserService = this.ioc.use('App/Services/UserService')
     const User = this.ioc.use('App/Models/User')
@@ -117,7 +136,7 @@ test.group('base service', group => {
 
     const { data: newUser } = await UserService.findOrCreate({ whereAttributes })
     assert.isNotNull(newUser)
-    assert.strictEqual(newUser.email, 'test@test.com')
+    assert.strictEqual(newUser.toJSON().email, 'test@test.com')
 
     const { data: existingUser } = await UserService.findOrCreate({ whereAttributes })
     assert.deepEqual(pick(existingUser.toJSON(), Object.keys(newUser.toJSON())), newUser.toJSON())
@@ -127,11 +146,74 @@ test.group('base service', group => {
     const UserService = this.ioc.use('App/Services/UserService')
     const User = this.ioc.use('App/Models/User')
 
-    const user = await User.create({ password: 123 })
+    const { data: user } = await UserService.create({ model: new User({ password: 123 }) })
     assert.strictEqual(user.password, 123)
 
     user.password = 321
     await UserService.update({ model: user })
     assert.strictEqual(user.password, 321)
+  })
+
+  test('should implement delete', async assert => {
+    const UserService = this.ioc.use('App/Services/UserService')
+    const User = this.ioc.use('App/Models/User')
+
+    const { data: user } = await UserService.create({ model: new User({ password: 123 }) })
+
+    await UserService.delete({ model: user }, true)
+    assert.strictEqual(user.deleted, 1, 'soft deleted')
+
+    await UserService.delete({ model: user })
+    const { error: { name } } = await UserService.find({ whereAttributes: { id: user.id } })
+
+    assert.strictEqual(name, 'ModelNotFoundException')
+  })
+
+  test('should implement undelete', async assert => {
+    const UserService = this.ioc.use('App/Services/UserService')
+    const User = this.ioc.use('App/Models/User')
+
+    const { data: user } = await UserService.create({ model: new User({ password: 123 }) })
+
+    await UserService.delete({ model: user }, true)
+    assert.strictEqual(user.deleted, 1)
+
+    await UserService.undelete({ model: user })
+    assert.strictEqual(user.deleted, 0)
+
+    await UserService.delete({ model: user }, false)
+
+    const { error: { name: errorName } } = await UserService.find({ whereAttributes: { id: user.id } })
+    assert.strictEqual(errorName, 'ModelNotFoundException')
+  })
+
+  test('should be able to query data', async assert => {
+    const UserService = this.ioc.use('App/Services/UserService')
+    const User = this.ioc.use('App/Models/User')
+
+    let { data: user } = await UserService.create({ model: new User({ password: 123 }) })
+    await UserService.delete({ model: user }, true) // softDelete
+
+    user = await UserService.query({ byActive: false }).first()
+    assert.strictEqual(user.toJSON().password, '123', 'byActive false working')
+
+    user = await UserService.query({ byActive: true }).first()
+    assert.isNull(user, 'byActive true working')
+  })
+
+  test('should implement checkResponses', assert => {
+    const UserService = this.ioc.use('App/Services/UserService')
+
+    const responses = [
+      new ServiceResponse({ error: new ValidationException('example validation') }),
+      new ServiceResponse({ error: new ValidationException('example validation 2'), data: 2 })
+    ]
+
+    const { error, data } = UserService.checkResponses({ responses })
+    assert.lengthOf(error, 2)
+    assert.lengthOf(data, 2)
+
+    assert.strictEqual(data[1], 2)
+    assert.isNull(data[0])
   })
 })

@@ -87,9 +87,9 @@ module.exports = (AdonisModel, Validator) =>
       }
 
       if (validation.fails()) {
-        return { error: new ValidationException('Validation failed.'), messages: validation.messages() }
+        return new ValidationException('Validation failed.', validation.messages())
       }
 
-      return { error: null, messages: null }
+      return null
     }
   }

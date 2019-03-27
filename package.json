@@ -27,7 +27,7 @@
   "scripts": {
     "eslint:check": "eslint ./",
     "eslint:fix": "eslint ./ --fix",
-    "test": "node japaFile.js",
+    "test": "node japaFile.js --inspect",
     "coverage:test": "nyc npm test",
     "coverage:publish": "nyc report --reporter=text-lcov > coverage.lcov && codecov"
   },
