@@ -1,6 +1,3 @@
-require('@adonisjs/lucid/lib/iocResolver').setFold(require('@adonisjs/fold'))
-
-const helpers = require('../../helpers')
 const test = require('japa')
 
 const { ioc } = require('@adonisjs/fold')
@@ -8,12 +5,11 @@ const { pick, range } = require('lodash')
 
 test.group('base model', group => {
   group.before(async () => {
-    this.ioc = await helpers.setup(ioc)
-    this.classMocker = require('../../mock/classes')(this.ioc)
+    ioc.restore()
 
-    const { Model } = this.classMocker
+    const { Model } = require('../../mock/classes')
 
-    this.ioc.fake('App/Models/User', () =>
+    ioc.fake('App/Models/User', () =>
       class User extends Model {
         profile () {
           return this.hasOne('App/Models/Profile')
@@ -26,7 +22,7 @@ test.group('base model', group => {
         }
       })
 
-    this.ioc.fake('App/Models/Profile', () =>
+    ioc.fake('App/Models/Profile', () =>
       class Profile extends Model {
         user () {
           return this.belongsTo('App/Models/User')
@@ -35,28 +31,23 @@ test.group('base model', group => {
   })
 
   group.afterEach(async () => {
-    await this.ioc.use('Database').truncate('profiles')
-    await this.ioc.use('Database').truncate('users')
-  })
-
-  group.after(async () => {
-    await this.ioc.use('Database').close()
-    await helpers.cleanupTempDir()
+    await use('Database').truncate('profiles')
+    await use('Database').truncate('users')
   })
 
   test('should be able to define a model and query it', async assert => {
-    const User = this.ioc.use('App/Models/User')
+    const User = use('App/Models/User')
 
     const modelData = { email: 'ahsirgashr', password: 'ahsirgashrs' }
+
     await User.create(modelData)
     const user = await User.first()
-
     assert.deepEqual(pick(user.toJSON(), Object.keys(modelData)), modelData)
   })
 
   test('should be able to query related data', async assert => {
-    const User = this.ioc.use('App/Models/User')
-    const Profile = this.ioc.use('App/Models/Profile')
+    const User = use('App/Models/User')
+    const Profile = use('App/Models/Profile')
 
     const user = await User.create({ email: '1234' })
     await Profile.create({ user_id: user.id })
@@ -66,17 +57,15 @@ test.group('base model', group => {
   })
 
   test('should sanitize before save', async assert => {
-    const User = this.ioc.use('App/Models/User')
+    const User = use('App/Models/User')
 
     await User.create({ email: 'hi', password: 'hi' })
-
     const user = await User.first()
-
     assert.equal(user.toJSON().password, 'his')
   })
 
   test('should support soft delete', async assert => {
-    const User = this.ioc.use('App/Models/User')
+    const User = use('App/Models/User')
     let user = await User.create({ email: 'hi', password: 123 })
 
     user = await User.first()
@@ -94,7 +83,7 @@ test.group('base model', group => {
   })
 
   test('should implement scope active', async assert => {
-    const User = this.ioc.use('App/Models/User')
+    const User = use('App/Models/User')
 
     await Promise.all(range(0, 19).map(v =>
       User.create({ email: `${v}`, password: `${v}`, deleted: 1 })
@@ -107,10 +96,10 @@ test.group('base model', group => {
   })
 
   test('should implement static get method relations', assert =>
-    assert.isDefined(this.ioc.use('App/Models/User').relations)
+    assert.isArray(use('App/Models/User').relations)
   )
 
   test('should implement static get method validationRules', assert =>
-    assert.isDefined(this.ioc.use('App/Models/User').validationRules)
+    assert.isObject(use('App/Models/User').validationRules)
   )
 })

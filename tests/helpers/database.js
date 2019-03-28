@@ -1,5 +1,5 @@
-function createTables (ioc) {
-  const Database = ioc.use('Database')
+function createTables () {
+  const Database = use('Database')
 
   return Promise.all([
     Database.schema.createTable('users', table => {

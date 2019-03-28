@@ -19,6 +19,8 @@ async function registerAdonis (ioc) {
     return AdonisModel
   })
 
+  ioc.alias('Adonis/Src/Model', 'Model')
+
   await registrar
     .providers(providers)
     .registerAndBoot()

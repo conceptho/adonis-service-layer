@@ -1,10 +1,10 @@
 const BaseRelation = require('@adonisjs/lucid/src/Lucid/Relations/BaseRelation')
 
-module.exports = (ioc) => {
-  const QueryBuilder = ioc.use('QueryBuilder')
-  const Database = ioc.use('Database')
-  const Validator = ioc.use('Validator')
-  const { Model } = ioc.use('Conceptho/Model')
+const mocker = () => {
+  const QueryBuilder = use('QueryBuilder')
+  const Database = use('Database')
+  const Validator = use('Validator')
+  const { Model } = use('Conceptho/Model')
 
   return {
     Controller: require('./Controller')(Model, QueryBuilder),
@@ -14,3 +14,5 @@ module.exports = (ioc) => {
     Model
   }
 }
+
+module.exports = mocker()
