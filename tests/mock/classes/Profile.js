@@ -1,7 +1,1 @@
-module.exports = ioc => {
-  const { Model } = ioc.use('Conceptho/Model')
-
-  return class Profile extends Model {
-
-  }
-}
+module.exports = (Model) => class Profile extends Model { }

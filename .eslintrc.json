@@ -11,5 +11,7 @@
   "parserOptions": {
     "ecmaVersion": 2018
   },
-  "rules": {}
+  "rules": {
+    "no-extra-parens" :"error"
+  }
 }

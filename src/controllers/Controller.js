@@ -1,8 +1,7 @@
-const Model = require('../models/Model')
 const ServiceResponse = require('../services/ServiceResponse')
 const HttpCodeException = require('../exceptions/http/HttpCodeException')
 
-module.exports = QueryBuilder => {
+module.exports = (ConcepthoModel, QueryBuilder) => {
   /**
    *  Default Controller
    */
@@ -10,7 +9,7 @@ module.exports = QueryBuilder => {
     /**
      * Expand the relations of a model
      */
-    applyExpand ({ data, expand, blackList = [], whiteList = [] }) {
+    async applyExpand ({ data, expand, blackList = [], whiteList = [] }) {
       let expandArray = expand
       let expandedData = data
 
@@ -21,7 +20,7 @@ module.exports = QueryBuilder => {
       if (expandArray && expandArray instanceof Array) {
         expandArray = [...new Set(expandArray)].filter(value => !blackList.includes(value) && whiteList.includes(value))
 
-        if (expandedData instanceof Model) {
+        if (expandedData instanceof ConcepthoModel) {
           return data.loadMany(expandArray)
         }
 
@@ -29,20 +28,20 @@ module.exports = QueryBuilder => {
           for (const i in expandArray) {
             expandedData = expandedData.with(expandArray[i])
           }
+
+          return expandedData.fetch()
         }
       }
-
-      return expandedData
     }
 
     /**
      * Verify a response returned by a Service.
      */
     async verifyServiceResponse ({ response, serviceResponse, callback = async () => { } }) {
-      const { success, data } = serviceResponse
+      const { error, data } = serviceResponse
 
       if (serviceResponse instanceof ServiceResponse) {
-        if (success) {
+        if (!error) {
           if (data) {
             await callback(data)
 

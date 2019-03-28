@@ -60,9 +60,6 @@ workflows:
       - publish-coverage:
           requires:
             - test
-          filters:
-            branches:
-              only: v1.0
       - deploy:
           requires:
             - test
