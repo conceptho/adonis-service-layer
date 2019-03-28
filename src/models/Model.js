@@ -1,7 +1,7 @@
 const DefaultSerializer = require('../serializers/DefaultSerializer')
 
 const { ValidationException } = require('../exceptions/runtime')
-const { pickBy, pick } = require('lodash')
+const { pick } = require('lodash')
 
 module.exports = (AdonisModel, Validator) =>
   class Model extends AdonisModel {
@@ -75,21 +75,17 @@ module.exports = (AdonisModel, Validator) =>
 
     async validate () {
       const { validationRules, validationMessages } = this.constructor
-      let validation
 
-      if (this.isNew) {
-        validation = await Validator.validateAll(this.$attributes, validationRules, validationMessages)
-      } else {
-        const { $originalAttributes: originalModelData, $attributes: data } = this
-
-        const dirtyData = pickBy(data, (value, key) => (originalModelData[key]) && (value !== originalModelData[key]))
-        validation = await Validator.validateAll(dirtyData, pick(validationRules, Object.keys(dirtyData)), validationMessages)
-      }
+      const validation = await (this.isNew
+        ? Validator.validateAll(this.$attributes, validationRules, validationMessages)
+        : Validator.validateAll(this.dirty, pick(validationRules, Object.keys(this.dirty)), validationMessages))
 
       if (validation.fails()) {
-        return new ValidationException('Validation failed.', validation.messages())
+        this.fill(this.$originalAttributes)
+
+        return { error: new ValidationException(`Validation failed for ${this.constructor.name}.`, validation.messages()) }
       }
 
-      return null
+      return { error: null }
     }
   }

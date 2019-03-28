@@ -25,17 +25,17 @@ module.exports = (Database, BaseRelation, Validator, Model) =>
      * @param {Transaction} param.trx Knex transaction
      */
     async create ({ model, trx }) {
-      const validationException = await model.validate()
+      const { error } = await model.validate()
 
-      if (!validationException) {
-        return this.executeCallback(async () => {
-          await model.save(trx)
-
-          return model
-        })
+      if (error) {
+        return new ServiceResponse({ error })
       }
 
-      return new ServiceResponse({ error: validationException })
+      return this.executeCallback(async () => {
+        await model.save(trx)
+
+        return model
+      })
     }
 
     /**
@@ -66,17 +66,17 @@ module.exports = (Database, BaseRelation, Validator, Model) =>
      * @param {Transaction} param.trx Knex transaction
      */
     async update ({ model, trx }) {
-      const validationException = await model.validate()
+      const { error } = await model.validate()
 
-      if (!validationException) {
-        return this.executeCallback(async () => {
-          await model.save(trx)
-
-          return model
-        })
+      if (error) {
+        return new ServiceResponse({ error })
       }
 
-      return new ServiceResponse({ error: validationException })
+      return this.executeCallback(async () => {
+        await model.save(trx)
+
+        return model
+      })
     }
 
     /**

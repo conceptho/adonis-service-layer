@@ -152,6 +152,11 @@ test.group('base service', group => {
     user.password = 321
     await UserService.update({ model: user })
     assert.strictEqual(user.password, 321)
+
+    user.email = 'abcd'
+    const { error } = await UserService.update({ model: user })
+    assert.strictEqual(error.constructor, ValidationException)
+    assert.isUndefined(user.email)
   })
 
   test('should implement delete', async assert => {
@@ -204,7 +209,7 @@ test.group('base service', group => {
   test('should implement checkResponses', assert => {
     const UserService = this.ioc.use('App/Services/UserService')
 
-    const responses = [
+    let responses = [
       new ServiceResponse({ error: new ValidationException('example validation') }),
       new ServiceResponse({ error: new ValidationException('example validation 2'), data: 2 })
     ]
@@ -215,5 +220,15 @@ test.group('base service', group => {
 
     assert.strictEqual(data[1], 2)
     assert.isNull(data[0])
+
+    responses = [
+      new ServiceResponse({ data: 'value' }),
+      new ServiceResponse({ data: { a: 'value' } })
+    ]
+
+    const { error: errors, data: datas } = UserService.checkResponses({ responses })
+    assert.strictEqual(datas[0], 'value')
+    assert.deepEqual(datas[1], { a: 'value' })
+    assert.isNull(errors)
   })
 })
