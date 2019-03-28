@@ -88,19 +88,17 @@ module.exports = (Database, BaseRelation, Validator, Model) =>
      * @throws {ServiceException} If model doesnt support softDelete and it is required
      */
     async delete ({ model, trx }, softDelete) {
-      if (softDelete) {
-        return this.executeCallback(async () => {
+      const callback = async () => {
+        if (softDelete) {
           await model.softDelete(trx)
-
-          return model
-        })
-      }
-
-      return this.executeCallback(async () => {
-        await model.delete(trx)
+        } else {
+          await model.delete(trx)
+        }
 
         return model
-      })
+      }
+
+      return this.executeCallback(callback)
     }
 
     /**

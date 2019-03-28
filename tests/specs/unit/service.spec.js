@@ -121,9 +121,13 @@ test.group('base service', group => {
     assert.isNotNull(newUser)
     assert.strictEqual(newUser.toJSON().email, 'test@test.com')
 
+    await UserService.delete({ model: newUser }, true)
+    const { error: { name } } = await UserService.find({ whereAttributes, byActive: true })
+    assert.strictEqual(name, 'ModelNotFoundException')
+
     const { data: unexistentUser, error: { name: notFound } } = await UserService.find({ whereAttributes: { email: 'oops' } })
     assert.isNull(unexistentUser)
-    assert.equal(notFound, 'ModelNotFoundException')
+    assert.strictEqual(notFound, 'ModelNotFoundException')
   })
 
   test('should implement findOrCreate', async assert => {
