@@ -1,12 +1,12 @@
 const ServiceResponse = require('../services/ServiceResponse')
 const { ServiceException } = require('../exceptions/runtime')
 
-const { reduce } = require('lodash')
+const { reduce, isEqual } = require('lodash')
 
 module.exports = (Database, BaseRelation, Validator, Model) =>
   class Service {
     constructor (modelClass) {
-      if (!(modelClass.prototype instanceof Model)) {
+      if (!(isEqual(modelClass.constructor, Model.constructor))) {
         throw new ServiceException(
           `Expected this service to handle a Model.
             Expected: ${Model.name}

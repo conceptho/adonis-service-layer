@@ -10,7 +10,8 @@ test.group('base service', group => {
   group.before(async () => {
     ioc.restore()
 
-    const { Model, Service } = require('../../mock/classes')
+    const { Model } = use('Conceptho/Models')
+    const { Service } = use('Conceptho/Services')
 
     ioc.fake('App/Models/User', () =>
       class User extends Model {

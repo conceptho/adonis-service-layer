@@ -22,6 +22,18 @@ module.exports = (AdonisModel, Validator) =>
       this.addHook('beforeSave', ModelHooks.updatedAtHook)
     }
 
+    static bootIfNotBooted () {
+      if (!this.$bootedBy) {
+        this.$bootedBy = []
+      }
+
+      if (this.$bootedBy.indexOf(this.name) < 0) {
+        this.$bootedBy.push(this.name)
+
+        this.boot()
+      }
+    }
+
     /**
      * Filter only records which delted equals zero.
      * @example

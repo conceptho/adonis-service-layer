@@ -3,14 +3,8 @@ const { registrar } = require('@adonisjs/fold')
 const { reduce } = require('lodash')
 const path = require('path')
 
-async function registerAdonis (ioc) {
-  ioc.bind('Adonis/Src/Helpers', function () {
-    return new Helpers(path.join(__dirname, '../'))
-  })
-
-  const providers = [
-    path.join(__dirname, '../../node_modules/@adonisjs/framework/providers/AppProvider')
-  ]
+async function registerProviders (ioc) {
+  ioc.bind('Adonis/Src/Helpers', () => new Helpers(path.join(__dirname, '../')))
 
   ioc.bind('Adonis/Src/Model', () => {
     const AdonisModel = require('@adonisjs/lucid/src/Lucid/Model')
@@ -20,6 +14,11 @@ async function registerAdonis (ioc) {
   })
 
   ioc.alias('Adonis/Src/Model', 'Model')
+
+  const providers = [
+    path.join(__dirname, '../../node_modules/@adonisjs/framework/providers/AppProvider'),
+    path.join(__dirname, '../../src/providers/ServiceLayerProvider')
+  ]
 
   await registrar
     .providers(providers)
@@ -52,17 +51,6 @@ function registerValidator (ioc) {
   ioc.alias('Adonis/Src/Validator', 'Validator')
 }
 
-function registerModels (ioc) {
-  ioc.bind('Conceptho/Model', () => {
-    const AdonisModel = require('@adonisjs/lucid/src/Lucid/Model')
-
-    const Model = require('../../src/models/Model')(AdonisModel, ioc.use('Validator'))
-    Model._bootIfNotBooted()
-
-    return { Model }
-  })
-}
-
 async function initializeIoc (ioc, dbPath) {
   const hasEmptyArgs = reduce(arguments, (res, value) => res && (value === undefined), true)
 
@@ -70,11 +58,10 @@ async function initializeIoc (ioc, dbPath) {
     throw new Error(`Plese check ${this.name} args: ${arguments}`)
   }
 
-  await registerAdonis(ioc)
-
   registerDatabase(ioc, dbPath)
   registerValidator(ioc)
-  registerModels(ioc)
+
+  await registerProviders(ioc)
 
   return ioc
 }

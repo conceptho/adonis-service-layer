@@ -16,14 +16,17 @@ class ServiceLayerProvider extends ServiceProvider {
     this.registerExceptions()
     this.registerServices(Database, BaseRelation, Validator)
     this.registerSerializers()
-    this.registerControllers(QueryBuilder)
+
+    const { Model } = this.app.use('Conceptho/Models')
+
+    this.registerControllers(Model, QueryBuilder)
     this.registerMiddlewares()
   }
 
   registerModels (AdonisModel, Validator) {
     this.app.bind('Conceptho/Models', () => {
       const Model = require('../models/Model')(AdonisModel, Validator)
-      Model._bootIfNotBooted()
+      Model.bootIfNotBooted()
 
       return { Model }
     })
@@ -31,7 +34,7 @@ class ServiceLayerProvider extends ServiceProvider {
 
   registerExceptions () {
     this.app.bind('Conceptho/Exceptions', () => ({
-      HttpCodeException: require('../exceptions/user/HttpCodeException'),
+      HttpCodeException: require('../exceptions/http/HttpCodeException'),
       ServiceException: require('../exceptions/runtime/ServiceException')
     }))
   }
@@ -53,9 +56,9 @@ class ServiceLayerProvider extends ServiceProvider {
     }))
   }
 
-  registerControllers (QueryBuilder) {
+  registerControllers (ConcepthoModel, QueryBuilder) {
     this.app.bind('Conceptho/Controllers', () => ({
-      Controller: require('../controllers/Controller')(QueryBuilder)
+      Controller: require('../controllers/Controller')(ConcepthoModel, QueryBuilder)
     }))
   }
 

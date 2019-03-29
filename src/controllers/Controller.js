@@ -20,17 +20,16 @@ module.exports = (ConcepthoModel, QueryBuilder) => {
       if (expandArray && expandArray instanceof Array) {
         expandArray = [...new Set(expandArray)].filter(value => !blackList.includes(value) && whiteList.includes(value))
 
-        if (expandedData instanceof ConcepthoModel) {
-          return data.loadMany(expandArray)
-        }
-
         if (expandedData instanceof QueryBuilder) {
+          // TODO Verirficar este caso
           for (const i in expandArray) {
             expandedData = expandedData.with(expandArray[i])
           }
 
           return expandedData.fetch()
         }
+
+        return data.loadMany(expandArray)
       }
     }
 
@@ -55,6 +54,22 @@ module.exports = (ConcepthoModel, QueryBuilder) => {
       }
 
       throw new HttpCodeException(500, data)
+    }
+
+    async verifyViewServiceResponse ({
+      response,
+      serviceResponse,
+      redirectParamWhenIsOk = 'back',
+      redirectParamWhenItsNot = 'back',
+      callbackWhenIsNotOk = async () => {},
+      callbackWhenIsOk = async () => {} }) {
+      try {
+        await this.verifyServiceResponse({ response, serviceResponse, callbackWhenIsOk })
+        return response.redirect(redirectParamWhenIsOk)
+      } catch (e) {
+        await callbackWhenIsNotOk(serviceResponse.data)
+        return response.status(e.code).redirect(redirectParamWhenItsNot)
+      }
     }
   }
 }
