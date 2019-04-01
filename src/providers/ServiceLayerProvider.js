@@ -5,27 +5,18 @@ class ServiceLayerProvider extends ServiceProvider {
     /**
      * Adonis Deps
      */
-    const QueryBuilder = use('@adonisjs/lucid/src/Lucid/QueryBuilder')
-    const BaseRelation = use('@adonisjs/lucid/src/Lucid/Relations/BaseRelation')
 
-    const Validator = use('Validator')
-    const Database = use('Database')
-    const AdonisModel = use('Model')
-
-    this.registerModels(AdonisModel, Validator)
+    this.registerModels()
     this.registerExceptions()
-    this.registerServices(Database, BaseRelation, Validator)
+    this.registerServices()
     this.registerSerializers()
-
-    const { Model } = this.app.use('Conceptho/Models')
-
-    this.registerControllers(Model, QueryBuilder)
+    this.registerControllers()
     this.registerMiddlewares()
   }
 
-  registerModels (AdonisModel, Validator) {
+  registerModels () {
     this.app.bind('Conceptho/Models', () => {
-      const Model = require('../models/Model')(AdonisModel, Validator)
+      const Model = require('../models/Model')(use('Model'), use('Validator'))
       Model.bootIfNotBooted()
 
       return { Model }
@@ -39,12 +30,13 @@ class ServiceLayerProvider extends ServiceProvider {
     }))
   }
 
-  registerServices (Database, BaseRelation, Validator) {
+  registerServices () {
     this.app.bind('Conceptho/Services', () => {
-      const { Model } = this.app.use('Conceptho/Models')
+      const BaseRelation = use('@adonisjs/lucid/src/Lucid/Relations/BaseRelation')
+      const { Model } = use('Conceptho/Models')
 
       return {
-        Service: require('../services/Service')(Database, BaseRelation, Validator, Model),
+        Service: require('../services/Service')(use('Database'), BaseRelation, use('Validator'), Model),
         ServiceResponse: require('../services/ServiceResponse')
       }
     })
@@ -56,10 +48,15 @@ class ServiceLayerProvider extends ServiceProvider {
     }))
   }
 
-  registerControllers (ConcepthoModel, QueryBuilder) {
-    this.app.bind('Conceptho/Controllers', () => ({
-      Controller: require('../controllers/Controller')(ConcepthoModel, QueryBuilder)
-    }))
+  registerControllers () {
+    this.app.bind('Conceptho/Controllers', () => {
+      const { Model } = use('Conceptho/Models')
+      const QueryBuilder = require('@adonisjs/lucid/src/Lucid/QueryBuilder')
+
+      return {
+        Controller: require('../controllers/Controller')(Model, QueryBuilder)
+      }
+    })
   }
 
   registerMiddlewares () {
