@@ -21,9 +21,8 @@ class ServiceLayerProvider extends ServiceProvider {
 
   registerExceptions () {
     this.app.bind('Conceptho/Exceptions', () => ({
-      HttpCodeException: require('../exceptions/http/HttpCodeException'),
-      ServiceException: require('../exceptions/runtime/ServiceException'),
-      ValidationException: require('../exceptions/runtime/ValidationException')
+      ...require('../exceptions/http'),
+      ...require('../exceptions/runtime')
     }))
   }
 
