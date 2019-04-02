@@ -2,10 +2,6 @@ const { ServiceProvider } = require('@adonisjs/fold')
 
 class ServiceLayerProvider extends ServiceProvider {
   register () {
-    /**
-     * Adonis Deps
-     */
-
     this.registerModels()
     this.registerExceptions()
     this.registerServices()
@@ -26,7 +22,8 @@ class ServiceLayerProvider extends ServiceProvider {
   registerExceptions () {
     this.app.bind('Conceptho/Exceptions', () => ({
       HttpCodeException: require('../exceptions/http/HttpCodeException'),
-      ServiceException: require('../exceptions/runtime/ServiceException')
+      ServiceException: require('../exceptions/runtime/ServiceException'),
+      ValidationException: require('../exceptions/runtime/ValidationException')
     }))
   }
 
@@ -36,7 +33,7 @@ class ServiceLayerProvider extends ServiceProvider {
       const { Model } = use('Conceptho/Models')
 
       return {
-        Service: require('../services/Service')(use('Database'), BaseRelation, use('Validator'), Model),
+        Service: require('../services/Service')(use('Database'), BaseRelation, Model),
         ServiceResponse: require('../services/ServiceResponse')
       }
     })
@@ -50,11 +47,10 @@ class ServiceLayerProvider extends ServiceProvider {
 
   registerControllers () {
     this.app.bind('Conceptho/Controllers', () => {
-      const { Model } = use('Conceptho/Models')
       const QueryBuilder = require('@adonisjs/lucid/src/Lucid/QueryBuilder')
 
       return {
-        Controller: require('../controllers/Controller')(Model, QueryBuilder)
+        Controller: require('../controllers/Controller')(QueryBuilder)
       }
     })
   }

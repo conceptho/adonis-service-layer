@@ -146,7 +146,7 @@ test.group('base service', group => {
 
     const { error } = await UserService.update({ model: user })
     assert.strictEqual(error.constructor, ValidationException)
-    assert.isUndefined(user.email)
+    assert.isTrue(user.isDirty)
   })
 
   test('should implement delete', async assert => {

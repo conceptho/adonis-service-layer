@@ -93,8 +93,6 @@ module.exports = (AdonisModel, Validator) =>
         : Validator.validateAll(this.dirty, pick(validationRules, Object.keys(this.dirty)), validationMessages))
 
       if (validation.fails()) {
-        this.fill(this.$originalAttributes)
-
         return { error: new ValidationException(`Validation failed for ${this.constructor.name}.`, validation.messages()) }
       }
 

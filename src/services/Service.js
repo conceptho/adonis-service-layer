@@ -3,7 +3,7 @@ const { ServiceException } = require('../exceptions/runtime')
 
 const { reduce, isEqual } = require('lodash')
 
-module.exports = (Database, BaseRelation, Validator, Model) =>
+module.exports = (Database, BaseRelation, Model) =>
   class Service {
     constructor (modelClass) {
       if (!(isEqual(modelClass.constructor, Model.constructor))) {

@@ -1,7 +1,7 @@
 const ServiceResponse = require('../services/ServiceResponse')
 const HttpCodeException = require('../exceptions/http/HttpCodeException')
 
-module.exports = (ConcepthoModel, QueryBuilder) => {
+module.exports = (QueryBuilder) => {
   /**
    *  Default Controller
    */
