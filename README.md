@@ -1,7 +1,7 @@
 # @conceptho/adonis-service-layer
-[![codecov](https://codecov.io/gh/conceptho/adonis-service-layer/branch/v1.0/graph/badge.svg)](https://codecov.io/gh/conceptho/adonis-service-layer)
-[![npm version](https://img.shields.io/npm/v/@conceptho/adonis-service-layer.svg?style=flat)](https://npmjs.org/package/@conceptho/adonis-service-layer)
-[![CircleCI](https://circleci.com/gh/conceptho/adonis-service-layer.svg?style=svg)](https://circleci.com/gh/conceptho/adonis-service-layer) 
+![Codecov](https://img.shields.io/codecov/c/github/conceptho/adonis-service-layer.svg?logo=codecov&style=for-the-badge)
+![CircleCI branch](https://img.shields.io/circleci/project/github/conceptho/adonis-service-layer/master.svg?logo=circleci&style=for-the-badge)
+![npm (tag)](https://img.shields.io/npm/v/@conceptho/adonis-service-layer/latest.svg?color=green&logo=npm&style=for-the-badge)
 
 | Namespace               | Exports                                                        |
 | :---------------------- | :------------------------------------------------------------- |
