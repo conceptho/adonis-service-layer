@@ -46,11 +46,8 @@ jobs:
       - attach_workspace:
           at: ~/repo
       - run:
-          name: Login Npm
-          command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/repo/.npmrc
-      - run:
-          name: Publish Package
-          command: npm publish
+          name: Deploy
+          command: ./deploy.sh
 
 workflows:
   version: 2
