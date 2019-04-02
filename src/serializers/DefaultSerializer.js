@@ -1,4 +1,4 @@
-const VanillaSerializer = require('@adonisjs/lucid/src/Lucid/Serializers/Vanilla');
+const VanillaSerializer = require('@adonisjs/lucid/src/Lucid/Serializers/Vanilla')
 
 class DefaultSerializer extends VanillaSerializer {
   /**
@@ -12,15 +12,15 @@ class DefaultSerializer extends VanillaSerializer {
    *
    * @private
    */
-  _getRowJSON(modelInstance) {
-    const json = super._getRowJSON(modelInstance);
+  _getRowJSON (modelInstance) {
+    const json = super._getRowJSON(modelInstance)
 
     // Delete meta & pivot fields
-    delete json.__meta__;
-    delete json.pivot;
+    delete json.__meta__
+    delete json.pivot
 
-    return json;
+    return json
   }
 }
 
-module.exports = DefaultSerializer;
+module.exports = DefaultSerializer

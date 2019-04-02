@@ -1,49 +1,68 @@
-const { ServiceProvider } = require('@adonisjs/fold');
+const { ServiceProvider } = require('@adonisjs/fold')
 
 class ServiceLayerProvider extends ServiceProvider {
-  register() {
-    // Making sure those dependencies are booted
-    const iocDependencies = ['Validator', 'Database'];
-    iocDependencies.forEach(dep => this.app.use(dep));
+  register () {
+    this.registerModels()
+    this.registerExceptions()
+    this.registerServices()
+    this.registerSerializers()
+    this.registerControllers()
+    this.registerMiddlewares()
+  }
 
-    this.app.bind('Conceptho/Middlewares/UseTransaction', () => require('../middlewares/UseTransaction'));
-    this.app.bind('Conceptho/Middlewares/HeaderPagination', () => require('../middlewares/HeaderPagination'));
-
+  registerModels () {
     this.app.bind('Conceptho/Models', () => {
-      const Model = require('../models/Model')(this.app.use('Model'), this.app.use('Validator'));
-      Model._bootIfNotBooted();
+      const Model = require('../models/Model')(use('Model'), use('Validator'))
+      Model.bootIfNotBooted()
 
-      return { Model };
-    });
+      return { Model }
+    })
+  }
 
-    this.app.bind('Conceptho/Exceptions', () => {
-      const ErrorCodeException = require('../exceptions/ErrorCodeException');
-      const defaultMessages = require('../exceptions/defaultMessages');
+  registerExceptions () {
+    this.app.bind('Conceptho/Exceptions', () => ({
+      ...require('../exceptions/http'),
+      ...require('../exceptions/runtime')
+    }))
+  }
 
-      return { ErrorCodeException, defaultMessages };
-    });
-
-    this.app.bind('Conceptho/Serializers', () => {
-      const DefaultSerializer = require('../serializers/DefaultSerializer');
-
-      return { DefaultSerializer };
-    });
-
-    this.app.bind('Conceptho/Controllers', () => {
-      const Controller = require('../controllers/Controller');
-
-      return { Controller };
-    });
-
+  registerServices () {
     this.app.bind('Conceptho/Services', () => {
-      const AdonisModel = use('Model')
+      const BaseRelation = use('@adonisjs/lucid/src/Lucid/Relations/BaseRelation')
+      const { Model } = use('Conceptho/Models')
 
-      const Service = require('../services/Service')(AdonisModel);
-      const ServiceResponse = require('../services/ServiceResponse');
+      return {
+        Service: require('../services/Service')(use('Database'), BaseRelation, Model),
+        ServiceResponse: require('../services/ServiceResponse')
+      }
+    })
+  }
 
-      return { Service, ServiceResponse };
-    });
+  registerSerializers () {
+    this.app.bind('Conceptho/Serializers', () => ({
+      DefaultSerializer: require('../serializers/DefaultSerializer')
+    }))
+  }
+
+  registerControllers () {
+    this.app.bind('Conceptho/Controllers', () => {
+      const QueryBuilder = require('@adonisjs/lucid/src/Lucid/QueryBuilder')
+
+      return {
+        Controller: require('../controllers/Controller')(QueryBuilder)
+      }
+    })
+  }
+
+  registerMiddlewares () {
+    this.app.bind('Conceptho/Middlewares/UseTransaction', () =>
+      require('../middlewares/UseTransaction')
+    )
+
+    this.app.bind('Conceptho/Middlewares/HeaderPagination', () =>
+      require('../middlewares/HeaderPagination')
+    )
   }
 }
 
-module.exports = ServiceLayerProvider;
+module.exports = ServiceLayerProvider

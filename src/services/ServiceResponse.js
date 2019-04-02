@@ -1,9 +1,12 @@
 class ServiceResponse {
-  constructor(isOk, data, metaData = {}) {
-    this.isOk = isOk;
-    this.data = data;
-    this.metaData = metaData;
+  /**
+   * Creates a new ServiceResponse
+   */
+  constructor ({ error, data, metaData }) {
+    this.error = error || null
+    this.data = data || null
+    this.metaData = metaData || null
   }
 }
 
-module.exports = ServiceResponse;
+module.exports = ServiceResponse

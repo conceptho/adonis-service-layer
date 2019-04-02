@@ -1,9 +1,20 @@
-const DefaultSerializer = require('../serializers/DefaultSerializer');
+const DefaultSerializer = require('../serializers/DefaultSerializer')
+
+const { ValidationException } = require('../exceptions/runtime')
+const { pick } = require('lodash')
 
 module.exports = (AdonisModel, Validator) =>
   class Model extends AdonisModel {
-    static boot() {
-      super.boot();
+    constructor (modelData) {
+      super()
+
+      if (modelData) {
+        this.fill(modelData)
+      }
+    }
+
+    static boot () {
+      super.boot()
 
       const ModelHooks = require('../hooks/Model')(Validator)
 
@@ -11,52 +22,54 @@ module.exports = (AdonisModel, Validator) =>
       this.addHook('beforeSave', ModelHooks.updatedAtHook)
     }
 
-    static _bootIfNotBooted() {
+    static bootIfNotBooted () {
       if (!this.$bootedBy) {
-        this.$bootedBy = [];
+        this.$bootedBy = []
       }
 
       if (this.$bootedBy.indexOf(this.name) < 0) {
-        this.$bootedBy.push(this.name);
+        this.$bootedBy.push(this.name)
 
-        this.boot();
+        this.boot()
       }
     }
 
-    static scopeActive(query) {
-      return query.andWhere({ deleted: 0 });
+    /**
+     * Filter only records which delted equals zero.
+     * @example
+     * await User.query().active().fetch()
+     * @param {Object} query This models query builder
+     */
+    static scopeActive (query) {
+      return query.andWhere({ deleted: 0 })
     }
 
-    async softDelete(transaction) {
-      this.deleted = 1;
-      const affected = await this.save(transaction);
+    /**
+     *
+     * @param {Object} transaction Knex transaction
+     */
+    async softDelete (transaction) {
+      this.deleted = 1
+      const affected = await this.save(transaction)
 
-      if (affected > 0) {
-        this.freeze();
+      if (affected) {
+        this.freeze()
       }
     }
 
-    async undelete(transaction) {
-      if (this.hasOwnProperty('deleted')) {
-        this.unfreeze();
-        this.deleted = 0;
+    async undelete (transaction) {
+      this.unfreeze()
+      this.deleted = 0
 
-        const affected = await this.save(transaction);
-        return !!affected;
-      }
-
-      return false;
+      const affected = await this.save(transaction)
+      return !!affected
     }
 
-    static relations() {
-      return [];
+    static get relations () {
+      return []
     }
 
-    static validationRules() {
-      return {};
-    }
-
-    static get sanitizeRules () {
+    static get validationRules () {
       return {}
     }
 
@@ -64,7 +77,25 @@ module.exports = (AdonisModel, Validator) =>
       return {}
     }
 
-    static get Serializer() {
-      return DefaultSerializer;
+    static get sanitizeRules () {
+      return {}
+    }
+
+    static get Serializer () {
+      return DefaultSerializer
+    }
+
+    async validate () {
+      const { validationRules, validationMessages } = this.constructor
+
+      const validation = await (this.isNew
+        ? Validator.validateAll(this.$attributes, validationRules, validationMessages)
+        : Validator.validateAll(this.dirty, pick(validationRules, Object.keys(this.dirty)), validationMessages))
+
+      if (validation.fails()) {
+        return { error: new ValidationException(`Validation failed for ${this.constructor.name}.`, validation.messages()) }
+      }
+
+      return { error: null }
     }
   }
