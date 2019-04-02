@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## v1.0.0 - April 2, 2019
+## 1.0.0 - April 2, 2019
 
 - Library:
   - Enforced Standard code style
