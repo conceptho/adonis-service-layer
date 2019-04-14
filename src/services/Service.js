@@ -47,11 +47,42 @@ module.exports = (Model) =>
     async delete({ model, trx, hardDelete = true }) {
       if (hardDelete) {
         return this.executeTransaction({
-          transaction: async trx => model.delete(trx),
+          transaction: async trx => this._delete({ model, trx }),
           trx,
         });
       }
       return this.softDelete({ model, trx });
+    }
+
+    async _delete ({ model, trx }) {
+      /**
+       * Executing before hooks
+       */
+      await model.constructor.$hooks.before.exec('delete', model)
+
+      const query = model.constructor.query()
+
+      if (trx) {
+        query.transacting(trx)
+      }
+
+      const affected = await query
+      .where(model.constructor.primaryKey, model.primaryKeyValue)
+      .ignoreScopes()
+      .delete()
+
+      /**
+       * If model was delete then freeze it modifications
+       */
+      if (affected > 0) {
+        model.freeze()
+      }
+
+      /**
+       * Executing after hooks
+       */
+      await model.constructor.$hooks.after.exec('delete', model)
+      return !!affected
     }
 
     async undelete({ model, trx = false }) {
