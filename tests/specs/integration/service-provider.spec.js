@@ -34,10 +34,8 @@ test.group('service provider', group => {
   })
 
   test('Conceptho/Middlewares', assert => {
-    const UseTransaction = use('Conceptho/Middlewares/UseTransaction')
     const HeaderPagination = use('Conceptho/Middlewares/HeaderPagination')
 
-    assert.isDefined(UseTransaction)
     assert.isDefined(HeaderPagination)
   })
 })

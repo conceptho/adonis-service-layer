@@ -147,6 +147,14 @@ module.exports = (Database, BaseRelation, Model) =>
       return byActive ? query.active() : query
     }
 
+    /**
+     * Reduces all given `ServiceResponse`s in a single `ServiceResponse`,
+     * where error is an array of `Error`s or `null` if none was found.
+     * If `data` is present, return it as the `ServiceResponse` data,
+     * otherwise `data` is an array of objects.
+     *
+     * @returns {ServiceResponse} result
+     */
     checkResponses ({ responses = [], data }) {
       const errors = reduce(responses, (res, value) => value.error ? [...res, value.error] : res, [])
       const responsesData = reduce(responses, (res, value) => value.data ? [...res, value.data] : [...res, null], [])

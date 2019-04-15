@@ -20,6 +20,12 @@ test.group('base model', group => {
             password: 'plural'
           }
         }
+
+        static get validationRules () {
+          return {
+            email: 'email'
+          }
+        }
       })
 
     ioc.fake('App/Models/Profile', () =>
@@ -31,8 +37,7 @@ test.group('base model', group => {
   })
 
   group.afterEach(async () => {
-    await use('Database').truncate('profiles')
-    await use('Database').truncate('users')
+    await use('Database').raw(`truncate "profiles" , "users" restart identity`)
   })
 
   test('should be able to define a model and query it', async assert => {
@@ -92,7 +97,8 @@ test.group('base model', group => {
     await User.create({ email: `${1}`, password: `${1}`, deleted: 0 })
 
     const [count] = await User.query().active().count()
-    assert.equal(count['count(*)'], 1)
+
+    assert.equal(count['count'], 1)
   })
 
   test('should implement static get method relations', assert =>
@@ -102,4 +108,37 @@ test.group('base model', group => {
   test('should implement static get method validationRules', assert =>
     assert.isObject(use('App/Models/User').validationRules)
   )
+
+  test('should implement validate', async assert => {
+    const ValidationException = require('../../../src/exceptions/runtime/ValidationException')
+    const User = use('App/Models/User')
+
+    let user = new User({ email: 'test' })
+    const { error: validationError } = await user.validate()
+
+    assert.instanceOf(validationError, ValidationException)
+
+    user = new User({ email: 'test@test.com' })
+    const { error } = await user.validate()
+
+    assert.isNull(error)
+  })
+
+  test('should support delete with transaction', async assert => {
+    const Database = use('Database')
+    const User = use('App/Models/User')
+
+    // eslint-disable-next-line no-unused-vars
+    const transaction = await Database.beginTransaction()
+
+    try {
+      // eslint-disable-next-line no-unused-vars
+      const user = await User.create({ email: 'hi' })
+    } catch (error) {
+      console.log(error)
+    }
+
+    const a = await User.query().where({ email: 'hi' }).first()
+    assert.isNotNull(a)
+  })
 })

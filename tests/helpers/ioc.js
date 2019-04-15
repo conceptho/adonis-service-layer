@@ -2,6 +2,7 @@ const { Config, Helpers } = require('@adonisjs/sink')
 const { registrar } = require('@adonisjs/fold')
 const { reduce } = require('lodash')
 const path = require('path')
+const dbConfig = require('../config/database')
 
 async function registerProviders (ioc) {
   ioc.bind('Adonis/Src/Helpers', () => new Helpers(path.join(__dirname, '../')))
@@ -20,6 +21,8 @@ async function registerProviders (ioc) {
     path.join(__dirname, '../../src/providers/ServiceLayerProvider')
   ]
 
+  ioc.autoload(path.join(__dirname, '../'), 'App')
+
   await registrar
     .providers(providers)
     .registerAndBoot()
@@ -30,7 +33,7 @@ function registerDatabase (ioc, dbPath) {
     const DatabaseManager = require('@adonisjs/lucid/src/Database/Manager')
 
     const config = new Config()
-    config.set('database', { connection: 'testing', testing: { client: 'sqlite', connection: { filename: dbPath } } })
+    config.set('database', { connection: 'testing', testing: dbConfig })
 
     return new DatabaseManager(config)
   })

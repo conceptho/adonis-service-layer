@@ -55,6 +55,8 @@ module.exports = (AdonisModel, Validator) =>
       if (affected) {
         this.freeze()
       }
+
+      return !!affected
     }
 
     async undelete (transaction) {
@@ -97,5 +99,36 @@ module.exports = (AdonisModel, Validator) =>
       }
 
       return { error: null }
+    }
+
+    async deleteWithinTransaction (trx) {
+      /**
+       * Executing before hooks
+       */
+      await this.constructor.$hooks.before.exec('delete', this)
+
+      const query = this.constructor.query()
+
+      if (trx) {
+        query.transacting(trx)
+      }
+
+      const affected = await query
+        .where(this.constructor.primaryKey, this.primaryKeyValue)
+        .ignoreScopes()
+        .delete()
+
+      /**
+       * If model was delete then freeze it modifications
+       */
+      if (affected > 0) {
+        this.freeze()
+      }
+
+      /**
+       * Executing after hooks
+       */
+      await this.constructor.$hooks.after.exec('delete', this)
+      return !!affected
     }
   }
