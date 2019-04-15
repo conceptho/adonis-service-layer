@@ -47,7 +47,7 @@ module.exports = (Model) =>
     async delete({ model, trx, hardDelete = true }) {
       if (hardDelete) {
         return this.executeTransaction({
-          transaction: async trx => model.delete(trx),
+          transaction: async trx => model['deleteWithinTransaction'] ? model.deleteWithinTransaction(trx) : model.delete(),
           trx,
         });
       }
