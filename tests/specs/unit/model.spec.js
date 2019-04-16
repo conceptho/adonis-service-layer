@@ -124,21 +124,26 @@ test.group('base model', group => {
     assert.isNull(error)
   })
 
-  test('should support delete with transaction', async assert => {
+  test('should support deleteWithinTransaction', async assert => {
     const Database = use('Database')
     const User = use('App/Models/User')
 
-    // eslint-disable-next-line no-unused-vars
-    const transaction = await Database.beginTransaction()
+    let user
+    let transaction
 
-    try {
-      // eslint-disable-next-line no-unused-vars
-      const user = await User.create({ email: 'hi' })
-    } catch (error) {
-      console.log(error)
-    }
+    user = await User.create({ email: 'hi' })
+    assert.isNotNull(await User.query().where({ email: 'hi' }).first())
 
-    const a = await User.query().where({ email: 'hi' }).first()
-    assert.isNotNull(a)
+    transaction = await Database.beginTransaction()
+    await user.deleteWithinTransaction(transaction)
+    assert.isNotNull(await User.query().where({ email: 'hi' }).first())
+    await transaction.commit()
+    assert.isNull(await User.query().where({ email: 'hi' }).first())
+
+    transaction = await Database.beginTransaction()
+    user = await User.create({ email: 'hi' })
+    await user.deleteWithinTransaction(transaction)
+    await transaction.rollback()
+    assert.isNotNull(await User.query().where({ email: 'hi' }).first())
   })
 })

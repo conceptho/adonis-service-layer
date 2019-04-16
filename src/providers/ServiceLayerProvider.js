@@ -55,12 +55,12 @@ class ServiceLayerProvider extends ServiceProvider {
   }
 
   registerMiddlewares () {
-    this.app.bind('Conceptho/Middlewares/UseTransaction', () =>
-      require('../middlewares/UseTransaction')
-    )
-
     this.app.bind('Conceptho/Middlewares/HeaderPagination', () =>
       require('../middlewares/HeaderPagination')
+    )
+
+    this.app.bind('Conceptho/Middlewares/UseServiceContext', () =>
+      require('../middlewares/ServiceContext')(this.app.use('Database'))
     )
   }
 }

@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const { isFunction } = require('lodash')
 
 module.exports = Database =>
