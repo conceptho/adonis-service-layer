@@ -2,7 +2,7 @@ FROM node:10-alpine
 
 WORKDIR /src
 
-ADD ./ ./
+COPY ./ ./
 
 RUN npm i
 
