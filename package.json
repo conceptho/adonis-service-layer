@@ -28,8 +28,8 @@
     "eslint:check": "eslint ./",
     "eslint:fix": "eslint ./ --fix",
     "test": "node japaFile.js --inspect",
-    "coverage:test": "nyc npm test",
-    "coverage:publish": "nyc report --reporter=text-lcov > coverage.lcov && codecov"
+    "coverage:test": "nyc npm test && nyc report --reporter=text-lcov > coverage.lcov",
+    "coverage:publish": "codecov"
   },
   "devDependencies": {
     "@adonisjs/fold": "^4.0.9",
