@@ -201,7 +201,6 @@ test.group('base service', group => {
 
     let { data: user } = await UserService.create({ model: new User({ password: 123 }) })
     await UserService.delete({ model: user }, true) // softDelete
-    console.log(await UserService.query({ byActive: false }))
     user = await UserService.query({ byActive: false }).first()
     assert.strictEqual(user.toJSON().password, '123', 'byActive false working')
 
