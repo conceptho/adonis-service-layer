@@ -46,9 +46,23 @@ test.group('base service', group => {
       })
 
     ioc.fake('App/Services/UserService', () => {
-      class UserService extends Service { }
+      class UserService extends Service {
+        get ModelName () {
+          return 'App/Models/User'
+        }
 
-      return new UserService(use('App/Models/User'))
+        onEntryHooks () {
+          const hooks = super.onEntryHooks()
+          hooks.push('logger')
+          return hooks
+        }
+
+        logger (argumentsList, target) {
+          // console.log(argumentsList, target)
+        }
+      }
+
+      return new UserService()
     })
   })
 
@@ -59,9 +73,8 @@ test.group('base service', group => {
 
   test('should handle a valid model class', async assert => {
     const User = use('App/Models/User')
-    const userService = use('App/Services/UserService')
-
-    assert.isTrue(userService.$model.constructor === User.constructor)
+    const UserService = use('App/Services/UserService')
+    assert.isTrue(UserService.Model.constructor === User.constructor)
   })
 
   test('should be able to create a related model', async assert => {
@@ -188,7 +201,7 @@ test.group('base service', group => {
 
     let { data: user } = await UserService.create({ model: new User({ password: 123 }) })
     await UserService.delete({ model: user }, true) // softDelete
-
+    console.log(await UserService.query({ byActive: false }))
     user = await UserService.query({ byActive: false }).first()
     assert.strictEqual(user.toJSON().password, '123', 'byActive false working')
 

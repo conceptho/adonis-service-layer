@@ -1,20 +1,49 @@
 const ServiceResponse = require('../services/ServiceResponse')
-const { ServiceException } = require('../exceptions/runtime')
+// const { ServiceException } = require('../exceptions/runtime')
+const proxyHandler = require('./proxyHandler')
 
-const { reduce, isEqual } = require('lodash')
+const { reduce } = require('lodash')
 
-module.exports = (Database, BaseRelation, Model) =>
+module.exports = (Database, BaseRelation, Logger, Env) => {
   class Service {
-    constructor (modelClass) {
-      if (!(isEqual(modelClass.constructor, Model.constructor))) {
-        throw new ServiceException(
-          `Expected this service to handle a Model.
-            Expected: ${Model.name}
-            Given: ${modelClass.constructor.name}`
-        )
+    constructor () {
+      return new Proxy(this, proxyHandler)
+    }
+
+    get ModelName () {
+      return 'Model'
+    }
+
+    get Model () {
+      if (!this.$model) {
+        this.$model = use(this.ModelName)
+      }
+      return this.$model
+    }
+
+    /**
+     * An array of methods to be called everytime
+     * a model is imported via ioc container.
+     *
+     * @attribute iocHooks
+     *
+     * @return {Array}
+     *
+     * @static
+     */
+    get iocHooks () {
+      return ['_bootIfNotBooted']
+    }
+
+    _bootIfNotBooted () {
+      if (!this.$bootedBy) {
+        this.$bootedBy = []
       }
 
-      this.$model = modelClass
+      if (this.$bootedBy.indexOf(this.constructor.name) < 0) {
+        this.$bootedBy.push(this.constructor.name)
+        this.Model.boot()
+      }
     }
 
     /**
@@ -24,7 +53,7 @@ module.exports = (Database, BaseRelation, Model) =>
      * @param {Model} param.model Model instance
      * @param {ServiceContext} param.trx Knex transaction
      */
-    async create ({ model, serviceContext = {} }) {
+    async actionCreate ({ model, serviceContext = {} }) {
       const { error } = await model.validate()
 
       if (error) {
@@ -47,7 +76,7 @@ module.exports = (Database, BaseRelation, Model) =>
      * @param {Transaction} param.trx Knex transaction
      * @param {Object} params.byActive If true, filter only active records
      */
-    async findOrCreate ({ whereAttributes, modelData = whereAttributes, serviceContext, byActive = false }) {
+    async actionFindOrCreate ({ whereAttributes, modelData = whereAttributes, serviceContext, byActive = false }) {
       const { data: modelFound } = await this.find({ whereAttributes, byActive })
 
       if (modelFound) {
@@ -65,7 +94,7 @@ module.exports = (Database, BaseRelation, Model) =>
      * @param {Model} param.model Model instance
      * @param {Transaction} param.trx Knex transaction
      */
-    async update ({ model, serviceContext = {} }) {
+    async actionUpdate ({ model, serviceContext = {} }) {
       const { error } = await model.validate()
 
       if (error) {
@@ -87,12 +116,14 @@ module.exports = (Database, BaseRelation, Model) =>
      * @param {Boolean} softDelete If true, performs a soft delete. Defaults to false
      * @throws {ServiceException} If model doesnt support softDelete and it is required
      */
-    async delete ({ model, serviceContext = {} }, softDelete) {
+    async actionDelete ({ model, serviceContext = {} }, softDelete) {
       const callback = async ({ transaction }) => {
         if (softDelete) {
           await model.softDelete(transaction)
         } else {
-          await model.delete(transaction)
+          model.deleteWithinTransaction
+            ? await model.deleteWithinTransaction(transaction)
+            : model.delete()
         }
 
         return model
@@ -106,7 +137,7 @@ module.exports = (Database, BaseRelation, Model) =>
      *
      * @param {Object} param
      */
-    async undelete ({ model, serviceContext = {} }) {
+    async actionUndelete ({ model, serviceContext = {} }) {
       return this.executeCallback(serviceContext, async ({ transaction }) => {
         await model.undelete(transaction)
 
@@ -122,7 +153,7 @@ module.exports = (Database, BaseRelation, Model) =>
      * @param {Object} params.byActive If true, filter only active records
      * @returns {ServiceResponse} Response
      */
-    async find ({ whereAttributes, byActive = false }) {
+    async actionFind ({ whereAttributes, byActive = false }) {
       let query = this.$model.query().where(whereAttributes)
 
       if (byActive) {
@@ -133,7 +164,7 @@ module.exports = (Database, BaseRelation, Model) =>
     }
 
     /**
-     * Returns a new QuryBuilder instance
+     * Returns a new QueryBuilder instance
      *
      * @param {*} param
      */
@@ -185,4 +216,27 @@ module.exports = (Database, BaseRelation, Model) =>
         return new ServiceResponse({ error })
       }
     }
+
+    onEntryHooks () {
+      return ['onEntry']
+    }
+
+    onExitHooks () {
+      return ['onExit']
+    }
+
+    onEntry (argumentsList, target) {
+      if (Env.get('SERVICE_DEBUG', false)) {
+        Logger.info(`${target.name} onEntry\nargumentsList:\n${argumentsList}\nactionResult:${actionResult}`)
+      }
+    }
+
+    onExit (argumentsList, actionResult, target) {
+      if (Env.get('SERVICE_DEBUG', false)) {
+        Logger.info(`${target.name} onExit\nargumentsList:\n${argumentsList}\nactionResult:${actionResult}`)
+      }
+    }
   }
+
+  return Service
+}
