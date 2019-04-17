@@ -33,7 +33,8 @@ class ServiceLayerProvider extends ServiceProvider {
 
       return {
         Service: require('../services/Service')(use('Database'), BaseRelation, Model),
-        ServiceResponse: require('../services/ServiceResponse')
+        ServiceResponse: require('../services/ServiceResponse'),
+        ServiceContext: require('../services/ServiceContext')(this.app.use('Database'))
       }
     })
   }
