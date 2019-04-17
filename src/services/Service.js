@@ -22,17 +22,17 @@ module.exports = (Database, BaseRelation, Model) =>
      *
      * @param {Object} param
      * @param {Model} param.model Model instance
-     * @param {Transaction} param.trx Knex transaction
+     * @param {ServiceContext} param.trx Knex transaction
      */
-    async create ({ model, trx }) {
+    async create ({ model, serviceContext = {} }) {
       const { error } = await model.validate()
 
       if (error) {
         return new ServiceResponse({ error })
       }
 
-      return this.executeCallback(async () => {
-        await model.save(trx)
+      return this.executeCallback(serviceContext, async ({ transaction }) => {
+        await model.save(transaction)
 
         return model
       })
@@ -47,7 +47,7 @@ module.exports = (Database, BaseRelation, Model) =>
      * @param {Transaction} param.trx Knex transaction
      * @param {Object} params.byActive If true, filter only active records
      */
-    async findOrCreate ({ whereAttributes, modelData = whereAttributes, trx, byActive = false }) {
+    async findOrCreate ({ whereAttributes, modelData = whereAttributes, serviceContext, byActive = false }) {
       const { data: modelFound } = await this.find({ whereAttributes, byActive })
 
       if (modelFound) {
@@ -55,7 +55,7 @@ module.exports = (Database, BaseRelation, Model) =>
       }
 
       const newModel = new this.$model(modelData)
-      return this.create({ model: newModel, trx })
+      return this.create({ model: newModel, serviceContext })
     }
 
     /**
@@ -65,15 +65,15 @@ module.exports = (Database, BaseRelation, Model) =>
      * @param {Model} param.model Model instance
      * @param {Transaction} param.trx Knex transaction
      */
-    async update ({ model, trx }) {
+    async update ({ model, serviceContext = {} }) {
       const { error } = await model.validate()
 
       if (error) {
         return new ServiceResponse({ error })
       }
 
-      return this.executeCallback(async () => {
-        await model.save(trx)
+      return this.executeCallback(serviceContext, async ({ transaction }) => {
+        await model.save(transaction)
 
         return model
       })
@@ -87,18 +87,18 @@ module.exports = (Database, BaseRelation, Model) =>
      * @param {Boolean} softDelete If true, performs a soft delete. Defaults to false
      * @throws {ServiceException} If model doesnt support softDelete and it is required
      */
-    async delete ({ model, trx }, softDelete) {
-      const callback = async () => {
+    async delete ({ model, serviceContext = {} }, softDelete) {
+      const callback = async ({ transaction }) => {
         if (softDelete) {
-          await model.softDelete(trx)
+          await model.softDelete(transaction)
         } else {
-          await model.delete(trx)
+          await model.delete(transaction)
         }
 
         return model
       }
 
-      return this.executeCallback(callback)
+      return this.executeCallback(serviceContext, callback)
     }
 
     /**
@@ -106,9 +106,9 @@ module.exports = (Database, BaseRelation, Model) =>
      *
      * @param {Object} param
      */
-    async undelete ({ model, trx = false }) {
-      return this.executeCallback(async () => {
-        await model.undelete(trx)
+    async undelete ({ model, serviceContext = {} }) {
+      return this.executeCallback(serviceContext, async ({ transaction }) => {
+        await model.undelete(transaction)
 
         return model
       })
@@ -129,7 +129,7 @@ module.exports = (Database, BaseRelation, Model) =>
         query = query.active()
       }
 
-      return this.executeCallback(async () => query.firstOrFail())
+      return this.executeCallback(null, async () => query.firstOrFail())
     }
 
     /**
@@ -137,11 +137,11 @@ module.exports = (Database, BaseRelation, Model) =>
      *
      * @param {*} param
      */
-    query ({ byActive, trx } = {}) {
+    query ({ byActive, serviceContext = {} } = {}) {
       const query = this.$model.query()
 
-      if (trx) {
-        query.transacting(trx)
+      if (serviceContext.transaction) {
+        query.transacting(serviceContext.transaction)
       }
 
       return byActive ? query.active() : query
@@ -165,19 +165,6 @@ module.exports = (Database, BaseRelation, Model) =>
       })
     }
 
-    async finalizeTransaction ({ isOk, trx, callbackAfterCommit = () => { }, restart = false }) {
-      if (isOk) {
-        await trx.commit()
-        await callbackAfterCommit()
-      } else {
-        await trx.rollback()
-      }
-      if (restart) {
-        trx = await Database.beginTransaction()
-      }
-      return trx
-    }
-
     applyTransactionToRelation ({ relation, trx }) {
       if (trx && relation instanceof BaseRelation) {
         relation.relatedQuery.transacting(trx)
@@ -188,12 +175,12 @@ module.exports = (Database, BaseRelation, Model) =>
      * Wraps a callback with a try/catch block and returns a ServiceResponse.
      *
      * @param {Function} callback
-     * @param {*} trx Knex transaction
+     * @param {*} serviceContext Knex transaction
      * @returns {ServiceResponse}
      */
-    async executeCallback (callback, trx) {
+    async executeCallback (serviceContext, callback) {
       try {
-        return new ServiceResponse({ data: await callback(trx) })
+        return new ServiceResponse({ data: await callback(serviceContext) })
       } catch (error) {
         return new ServiceResponse({ error })
       }
