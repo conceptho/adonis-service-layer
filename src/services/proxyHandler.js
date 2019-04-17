@@ -16,15 +16,17 @@ const getHandler = {
 
 const applyHandler = {
   apply: async function (target, thisArg, argumentsList) {
-    console.log(thisArg)
     const onEntryFunctionsArray = thisArg['onEntryHooks']().map(v => thisArg[v]).filter(v => _isFunction(v))
     const onExitFunctionsArray = thisArg['onExitHooks']().map(v => thisArg[v]).filter(v => _isFunction(v))
     const resultOnEntryFunctions = await Promise.all(
-      onEntryFunctionsArray.map(func => func(argumentsList))
+      onEntryFunctionsArray.map(func => func(argumentsList, target))
     )
-    const actionResult = await target(...argumentsList)
+    const targetWithBind = (target.bind(thisArg))
+    const actionResult = targetWithBind.constructor.name === 'AsyncFunction'
+      ? await targetWithBind(...argumentsList)
+      : targetWithBind(...argumentsList)
     const resultOnExitFunctions = await Promise.all(
-      onExitFunctionsArray.map(func => func(argumentsList, actionResult))
+      onExitFunctionsArray.map(func => func(argumentsList, actionResult, target))
     )
     _assign(actionResult.extraData, { resultOnEntryFunctions, resultOnExitFunctions })
     return actionResult
