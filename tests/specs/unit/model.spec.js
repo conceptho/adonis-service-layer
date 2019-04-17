@@ -37,7 +37,8 @@ test.group('base model', group => {
   })
 
   group.afterEach(async () => {
-    await use('Database').raw(`truncate "profiles" , "users" restart identity`)
+    await use('Database').raw('delete from profiles')
+    await use('Database').raw('delete from users')
   })
 
   test('should be able to define a model and query it', async assert => {
@@ -98,7 +99,7 @@ test.group('base model', group => {
 
     const [count] = await User.query().active().count()
 
-    assert.equal(count['count'], 1)
+    assert.equal(count['count(*)'], 1)
   })
 
   test('should implement static get method relations', assert =>

@@ -12,13 +12,14 @@ services:
       - .:/src
 
     depends_on:
-      - postgres
+      - db
 
-  postgres:
-    image: postgres:11.2-alpine
-    container_name: postgres
+  db:
+    image: mysql:5.7.22
+    container_name: testdb
     ports:
-      - 5432
+      - 3306
+    command: [ '--max_allowed_packet=512M', '--character-set-server=utf8' ]
     environment:
-    - POSTGRES_PASSWORD=root
-    - POSTGRES_DB=servicelayer
+    - MYSQL_ROOT_PASSWORD=root
+    - MYSQL_DATABASE=servicelayer

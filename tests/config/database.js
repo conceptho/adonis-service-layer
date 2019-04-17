@@ -1,10 +1,10 @@
 module.exports = {
-  client: 'pg',
+  client: 'mysql2',
   connection: {
-    host: 'postgres',
-    user: 'postgres',
+    host: 'db',
+    user: 'root',
     password: 'root',
     database: 'servicelayer',
-    port: '5432'
+    port: '3306'
   }
 }
