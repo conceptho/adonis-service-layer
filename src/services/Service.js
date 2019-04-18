@@ -15,17 +15,13 @@ module.exports = (Database, BaseRelation, Logger, Env, Model) => {
       return 'Model'
     }
 
+    get hasModel () {
+      return true
+    }
+
     get Model () {
       if (!this.$model) {
         this.$model = use(this.ModelName)
-        const modelInstance = new (this.$model)()
-        if (!(modelInstance instanceof Model)) {
-          throw new ServiceException(
-            `Expected this service to handle a Model.
-            Expected: ${Model.name}
-            Given: ${this.$model.name}`
-          )
-        }
       }
       return this.$model
     }
@@ -40,18 +36,28 @@ module.exports = (Database, BaseRelation, Logger, Env, Model) => {
      *
      * @static
      */
-    get iocHooks () {
+    static get iocHooks () {
       return ['_bootIfNotBooted']
     }
 
-    _bootIfNotBooted () {
+    static _bootIfNotBooted () {
       if (!this.$bootedBy) {
         this.$bootedBy = []
       }
 
       if (this.$bootedBy.indexOf(this.constructor.name) < 0) {
         this.$bootedBy.push(this.constructor.name)
-        this.Model.boot()
+        if (this.hasModel) {
+          this.Model.boot()
+          const modelInstance = new (this.Model)()
+          if (!(modelInstance instanceof Model)) {
+            throw new ServiceException(
+              `Expected this service to handle a Model.
+            Expected: ${Model.name}
+            Given: ${this.Model.name}`
+            )
+          }
+        }
       }
     }
 
