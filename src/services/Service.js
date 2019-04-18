@@ -1,11 +1,11 @@
 const ServiceResponse = require('../services/ServiceResponse')
-// const { ServiceException } = require('../exceptions/runtime')
+const { ServiceException } = require('../exceptions/runtime')
 const proxyHandler = require('./proxyHandler')
 
 const { reduce } = require('lodash')
 const util = require('util')
 
-module.exports = (Database, BaseRelation, Logger, Env) => {
+module.exports = (Database, BaseRelation, Logger, Env, Model) => {
   class Service {
     constructor () {
       return new Proxy(this, proxyHandler)
@@ -18,6 +18,14 @@ module.exports = (Database, BaseRelation, Logger, Env) => {
     get Model () {
       if (!this.$model) {
         this.$model = use(this.ModelName)
+        const modelInstance = new (this.$model)()
+        if (!(modelInstance instanceof Model)) {
+          throw new ServiceException(
+            `Expected this service to handle a Model.
+            Expected: ${Model.name}
+            Given: ${this.$model.name}`
+          )
+        }
       }
       return this.$model
     }
