@@ -53,8 +53,8 @@ test.group('base service', group => {
   })
 
   group.afterEach(async () => {
-    await use('Database').truncate('profiles')
-    await use('Database').truncate('users')
+    await use('Database').raw('delete from profiles')
+    await use('Database').raw('delete from users')
   })
 
   test('should handle a valid model class', async assert => {

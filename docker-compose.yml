@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  service-layer:
+    build: .
+    container_name: servicelayer
+    stdin_open: true
+    tty: true
+    command: sh
+
+    volumes:
+      - .:/src
+
+    depends_on:
+      - db
+
+  db:
+    image: mysql:5.7.22
+    container_name: testdb
+    ports:
+      - 3306
+    command: [ '--max_allowed_packet=512M', '--character-set-server=utf8' ]
+    environment:
+    - MYSQL_ROOT_PASSWORD=root
+    - MYSQL_DATABASE=servicelayer

@@ -12,6 +12,7 @@
     "ecmaVersion": 2018
   },
   "rules": {
-    "no-extra-parens" :"error"
+    "no-extra-parens" :"error",
+    "arrow-parens":["error", "as-needed"]
   }
 }

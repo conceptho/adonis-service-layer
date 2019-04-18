@@ -20,6 +20,12 @@ test.group('base model', group => {
             password: 'plural'
           }
         }
+
+        static get validationRules () {
+          return {
+            email: 'email'
+          }
+        }
       })
 
     ioc.fake('App/Models/Profile', () =>
@@ -31,8 +37,8 @@ test.group('base model', group => {
   })
 
   group.afterEach(async () => {
-    await use('Database').truncate('profiles')
-    await use('Database').truncate('users')
+    await use('Database').raw('delete from profiles')
+    await use('Database').raw('delete from users')
   })
 
   test('should be able to define a model and query it', async assert => {
@@ -92,6 +98,7 @@ test.group('base model', group => {
     await User.create({ email: `${1}`, password: `${1}`, deleted: 0 })
 
     const [count] = await User.query().active().count()
+
     assert.equal(count['count(*)'], 1)
   })
 
@@ -102,4 +109,42 @@ test.group('base model', group => {
   test('should implement static get method validationRules', assert =>
     assert.isObject(use('App/Models/User').validationRules)
   )
+
+  test('should implement validate', async assert => {
+    const ValidationException = require('../../../src/exceptions/runtime/ValidationException')
+    const User = use('App/Models/User')
+
+    let user = new User({ email: 'test' })
+    const { error: validationError } = await user.validate()
+
+    assert.instanceOf(validationError, ValidationException)
+
+    user = new User({ email: 'test@test.com' })
+    const { error } = await user.validate()
+
+    assert.isNull(error)
+  })
+
+  test('should support deleteWithinTransaction', async assert => {
+    const Database = use('Database')
+    const User = use('App/Models/User')
+
+    let user
+    let transaction
+
+    user = await User.create({ email: 'hi' })
+    assert.isNotNull(await User.query().where({ email: 'hi' }).first())
+
+    transaction = await Database.beginTransaction()
+    await user.deleteWithinTransaction(transaction)
+    assert.isNotNull(await User.query().where({ email: 'hi' }).first())
+    await transaction.commit()
+    assert.isNull(await User.query().where({ email: 'hi' }).first())
+
+    transaction = await Database.beginTransaction()
+    user = await User.create({ email: 'hi' })
+    await user.deleteWithinTransaction(transaction)
+    await transaction.rollback()
+    assert.isNotNull(await User.query().where({ email: 'hi' }).first())
+  })
 })

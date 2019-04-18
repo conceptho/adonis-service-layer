@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 1.0.3 - April 17, 2019
+
+- Library:
+  - Added middleware `Conceptho/Middlewares/UseServiceContext`.
+  - Added `ServiceContext`.
+
 ## 1.0.0 - April 2, 2019
 
 - Library:

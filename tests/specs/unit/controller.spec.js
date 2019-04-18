@@ -34,8 +34,8 @@ test.group('base controller', group => {
   })
 
   group.afterEach(async () => {
-    await use('Database').truncate('profiles')
-    await use('Database').truncate('users')
+    await use('Database').raw('delete from profiles')
+    await use('Database').raw('delete from users')
   })
 
   test('should have applyExpand defined', assert => {
