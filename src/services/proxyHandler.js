@@ -28,7 +28,10 @@ const applyHandler = {
     const resultOnExitFunctions = await Promise.all(
       onExitFunctionsArray.map(func => func(argumentsList, actionResult, target))
     )
-    _assign(actionResult.extraData, { resultOnEntryFunctions, resultOnExitFunctions })
+    const info = {}
+    info[`${target.name}MetaData`] = { resultOnEntryFunctions, resultOnExitFunctions }
+    actionResult.metaData = actionResult.metaData || {}
+    _assign(actionResult.metaData, info)
     return actionResult
   }
 }

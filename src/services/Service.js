@@ -229,13 +229,17 @@ module.exports = (Database, BaseRelation, Logger, Env) => {
     onEntry (argumentsList, target) {
       if (Env.get('SERVICE_DEBUG', false) === 'true') {
         Logger.info(`\n${target.name} onEntry\nargumentsList:\n${util.inspect(argumentsList, { colors: true, compact: false })}`)
+        return true
       }
+      return false
     }
 
     onExit (argumentsList, actionResult, target) {
       if (Env.get('SERVICE_DEBUG', false) === 'true') {
         Logger.info(`\n${target.name} onExit status: ${actionResult.error ? 'error' : 'success'}\nargumentsList:\n${util.inspect(argumentsList, { colors: true, compact: false })}\nactionResult:\n${util.inspect(actionResult, { colors: true, compact: false })}`)
+        return true
       }
+      return false
     }
   }
 
