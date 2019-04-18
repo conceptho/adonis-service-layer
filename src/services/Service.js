@@ -3,6 +3,7 @@ const ServiceResponse = require('../services/ServiceResponse')
 const proxyHandler = require('./proxyHandler')
 
 const { reduce } = require('lodash')
+const util = require('util')
 
 module.exports = (Database, BaseRelation, Logger, Env) => {
   class Service {
@@ -154,7 +155,7 @@ module.exports = (Database, BaseRelation, Logger, Env) => {
      * @returns {ServiceResponse} Response
      */
     async actionFind ({ whereAttributes, byActive = false }) {
-      let query = this.$model.query().where(whereAttributes)
+      let query = this.Model.query().where(whereAttributes)
 
       if (byActive) {
         query = query.active()
@@ -169,7 +170,7 @@ module.exports = (Database, BaseRelation, Logger, Env) => {
      * @param {*} param
      */
     query ({ byActive, serviceContext = {} } = {}) {
-      const query = this.$model.query()
+      const query = this.Model.query()
 
       if (serviceContext.transaction) {
         query.transacting(serviceContext.transaction)
@@ -226,14 +227,14 @@ module.exports = (Database, BaseRelation, Logger, Env) => {
     }
 
     onEntry (argumentsList, target) {
-      if (Env.get('SERVICE_DEBUG', false)) {
-        Logger.info(`${target.name} onEntry\nargumentsList:\n${argumentsList}\nactionResult:${actionResult}`)
+      if (Env.get('SERVICE_DEBUG', false) === 'true') {
+        Logger.info(`\n${target.name} onEntry\nargumentsList:\n${util.inspect(argumentsList, { colors: true, compact: false })}`)
       }
     }
 
     onExit (argumentsList, actionResult, target) {
-      if (Env.get('SERVICE_DEBUG', false)) {
-        Logger.info(`${target.name} onExit\nargumentsList:\n${argumentsList}\nactionResult:${actionResult}`)
+      if (Env.get('SERVICE_DEBUG', false) === 'true') {
+        Logger.info(`\n${target.name} onExit status: ${actionResult.error ? 'error' : 'success'}\nargumentsList:\n${util.inspect(argumentsList, { colors: true, compact: false })}\nactionResult:\n${util.inspect(actionResult, { colors: true, compact: false })}`)
       }
     }
   }
