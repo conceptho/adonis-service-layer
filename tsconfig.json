@@ -68,6 +68,7 @@
     "node_modules"
   ],
   "include": [
-    "./src/**/*"
+    "./src/**/*",
+    "./typings/**/*"
   ]
 }

@@ -5,14 +5,9 @@ const proxyHandler = require('./proxyHandler')
 const { reduce } = require('lodash')
 const util = require('util')
 
-interface ServiceInterface {
-    create: Function
-    Model: any
-    find: Function
-}
-
 module.exports = (Database: any, BaseRelation: any, Logger: any, Env: any, Model: any) => {
-    class Service implements ServiceInterface {
+    class Service {
+        [x: string]: any;
         static $model: any
         static $bootedBy: Array<string>
 
@@ -88,7 +83,7 @@ module.exports = (Database: any, BaseRelation: any, Logger: any, Env: any, Model
                 return new ServiceResponse({ error })
             }
 
-            return this.executeCallback(serviceContext, async ({ transaction = false }) => {
+            return this.executeCallback(serviceContext, async ({ transaction }: any) => {
                 await model.save(transaction)
 
                 return model
@@ -181,8 +176,8 @@ module.exports = (Database: any, BaseRelation: any, Logger: any, Env: any, Model
          * @param {Object} params.byActive If true, filter only active records
          * @returns {ServiceResponse} Response
          */
-        async actionFind ({ whereAttributes, byActive = false }: any) {
-            let query = this.Model.query().where(whereAttributes)
+        async actionFind ({ whereAttributes, byActive = false, serviceContext }: any) {
+            let query = this.query({ byActive, serviceContext }).where(whereAttributes)
 
             if (byActive) {
                 query = query.active()

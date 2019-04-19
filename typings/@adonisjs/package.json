@@ -1,0 +1,16 @@
+{
+  "name": "adonis-typescript",
+  "version": "1.0.0",
+  "description": "Adonis framework Full TypeScript definitions.",
+  "main": "index.js",
+  "keywords": [
+    "adonis",
+    "typescript",
+    "types"
+  ],
+  "dependencies": {
+    "@types/ioredis": "*"
+  },
+  "author": "tiansin",
+  "license": "MIT"
+}

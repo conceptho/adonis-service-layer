@@ -58,7 +58,7 @@ module.exports = (Database, BaseRelation, Logger, Env, Model) => {
         if (error) {
           return new ServiceResponse({ error })
         }
-        return this.executeCallback(serviceContext, ({ transaction = false }) => __awaiter(this, void 0, void 0, function * () {
+        return this.executeCallback(serviceContext, ({ transaction }) => __awaiter(this, void 0, void 0, function * () {
           yield model.save(transaction)
           return model
         }))
@@ -109,9 +109,9 @@ module.exports = (Database, BaseRelation, Logger, Env, Model) => {
         }))
       })
     }
-    actionFind ({ whereAttributes, byActive = false }) {
+    actionFind ({ whereAttributes, byActive = false, serviceContext }) {
       return __awaiter(this, void 0, void 0, function * () {
-        let query = this.Model.query().where(whereAttributes)
+        let query = this.query({ byActive, serviceContext }).where(whereAttributes)
         if (byActive) {
           query = query.active()
         }
