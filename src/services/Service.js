@@ -92,7 +92,7 @@ module.exports = (Database, BaseRelation, Logger, Env, Model) => {
      * @param {Object} params.byActive If true, filter only active records
      */
     async actionFindOrCreate ({ whereAttributes, modelData = whereAttributes, serviceContext, byActive = false }) {
-      const { data: modelFound } = await this.find({ whereAttributes, byActive })
+      const { data: modelFound } = await this.find({ whereAttributes, byActive, serviceContext })
 
       if (modelFound) {
         return new ServiceResponse({ data: modelFound })
@@ -168,8 +168,8 @@ module.exports = (Database, BaseRelation, Logger, Env, Model) => {
      * @param {Object} params.byActive If true, filter only active records
      * @returns {ServiceResponse} Response
      */
-    async actionFind ({ whereAttributes, byActive = false }) {
-      let query = this.Model.query().where(whereAttributes)
+    async actionFind ({ whereAttributes, byActive = false, serviceContext }) {
+      let query = this.query({ byActive, serviceContext }).where(whereAttributes)
 
       if (byActive) {
         query = query.active()
