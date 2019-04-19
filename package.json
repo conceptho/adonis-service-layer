@@ -29,7 +29,8 @@
     "eslint:fix": "eslint ./ --fix",
     "test": "node japaFile.js --inspect",
     "coverage:test": "nyc npm test && nyc report --reporter=text-lcov > coverage.lcov",
-    "coverage:publish": "codecov"
+    "coverage:publish": "codecov",
+    "build": "tsc"
   },
   "devDependencies": {
     "@adonisjs/fold": "^4.0.9",
@@ -37,6 +38,9 @@
     "@adonisjs/lucid": "^6.1.3",
     "@adonisjs/sink": "^1.0.17",
     "@adonisjs/validator": "^5.0.6",
+    "@types/knex": "^0.16.1",
+    "@types/lodash": "^4.14.123",
+    "@types/node": "^11.13.5",
     "codecov": "^3.3.0",
     "eslint": "^5.16.0",
     "eslint-config-standard": "^12.0.0",
@@ -50,7 +54,9 @@
     "lint-staged": "^8.1.5",
     "mysql2": "^1.6.5",
     "nyc": "^14.0.0",
-    "supertest": "^4.0.2"
+    "supertest": "^4.0.2",
+    "tslint": "^5.16.0",
+    "typescript": "^3.4.4"
   },
   "dependencies": {
     "lodash": "^4.17.11"
