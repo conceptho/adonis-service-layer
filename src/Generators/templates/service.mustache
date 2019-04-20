@@ -4,6 +4,7 @@ const { Service } = use('Conceptho/Services')
 
 class {{name}} extends Service {
 
+    {{#hasModel}}
     /**
     * Returns the path for the Model related to this Service
     * @returns {string}
@@ -12,6 +13,7 @@ class {{name}} extends Service {
     static get ModelName () {
         return '{{{modelName}}}'
     }
+    {{/hasModel}}
 
     /**
     * Returns if this Service is related to a Model
