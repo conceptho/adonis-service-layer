@@ -11,10 +11,19 @@ module.exports = (Database, BaseRelation, Logger, Env, Model) => {
       return new Proxy(this, proxyHandler)
     }
 
+    /**
+     * Returns the path for the Model related to this Service
+     * @returns {string}
+     * @constructor
+     */
     static get ModelName () {
       return 'Model'
     }
 
+    /**
+     * Returns if this Service is related to a Model
+     * @returns {boolean}
+     */
     static get hasModel () {
       return true
     }
