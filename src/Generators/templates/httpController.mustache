@@ -9,7 +9,10 @@
     * Resourceful controller for interacting with {{resourceNamePlural}}
     */
 {{/resource}}
-class {{name}} {
+
+const { Controller } = use('Conceptho/Controllers')
+
+class {{name}} extends Controller {
 {{#resource}}
     /**
     * Show a list of all {{resourceNamePlural}}.
