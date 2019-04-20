@@ -45,7 +45,7 @@ class MakeBase extends BaseCommand {
     const templateFile = path.join(__dirname, '../../Generators/templates', `${templateFor}.mustache`)
 
     const filePath = generators[templateFor].getFilePath(name, options)
-    const data = generators[templateFor].getData(path.basename(name), flags)
+    const data = generators[templateFor].getData(path.basename(name), flags, options)
 
     debug('blueprint file path %s', filePath)
     debug('blueprint data %j', data)

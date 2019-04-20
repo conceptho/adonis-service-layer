@@ -75,10 +75,10 @@ generators.service = {
    *
    * @return {Object}
    */
-  getData (name, flags) {
+  getData (name, flags, options) {
     return {
       name: this.getFileName(name),
-      modelName: flags.modelName || name
+      modelName: flags.modelName || `App/${options.dirs.models}/${name}`
     }
   },
 
