@@ -29,7 +29,7 @@ class MakeService extends BaseCommand {
     return `
     conceptho:service
     { name: Name of the Service }
-    { -mn?=@value, --modelName?=@value: Name of the model for this Service }
+    { --modelName?=@value: Name of the model for this Service }
     `
   }
 
