@@ -8,12 +8,26 @@ const proxyHandler = require('./proxyHandler')
 const { reduce } = require('lodash')
 const util = require('util')
 
+interface ServiceInterface {
+    actionCreate({ model, serviceContext }: any): Promise<any>
+    actionFindOrCreate({ whereAttributes, modelData, serviceContext, byActive } : any): Promise<any>
+    actionUpdate({ model, serviceContext }: any): Promise<any>
+    actionDelete({ model, serviceContext }: any, softDelete: boolean): Promise<any>
+    actionUndelete({ model, serviceContext }: any): Promise<any>
+    actionFind({ whereAttributes, byActive, serviceContext }: any): Promise<any>
+    create?({ model, serviceContext }: any): Promise<any>
+    findOrCreate?({ whereAttributes, modelData, serviceContext, byActive } : any): Promise<any>
+    update?({ model, serviceContext }: any): Promise<any>
+    delete?({ model, serviceContext }: any, softDelete: boolean): Promise<any>
+    undelete?({ model, serviceContext }: any): Promise<any>
+    find?({ whereAttributes, byActive, serviceContext }: any): Promise<any>
+}
+
 module.exports = (Database: any, BaseRelation: any, Logger: Logger, Env: Env, Model: Model) => {
-    class Service {
+    class Service implements ServiceInterface {
         [x: string]: any;
         static $model: any
         static $bootedBy: Array<string>
-
         ['constructor']: typeof Service
 
         constructor () {
@@ -36,7 +50,7 @@ module.exports = (Database: any, BaseRelation: any, Logger: Logger, Env: Env, Mo
         }
 
         get Model () {
-            return (this.constructor as typeof Service).Model
+            return this.constructor.Model
         }
 
         /**
