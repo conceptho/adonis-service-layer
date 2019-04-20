@@ -30,6 +30,8 @@ class MakeService extends BaseCommand {
     conceptho:service
     { name: Name of the Service }
     { --modelName?=@value: Name of the model for this Service }
+    { -a, --actions: Generate base Actions }
+    { --hasModel: has a Model related to }
     `
   }
 
@@ -54,10 +56,10 @@ class MakeService extends BaseCommand {
    *
    * @return {void}
    */
-  async handle ({ name }, { modelName }) {
+  async handle ({ name }, { modelName, hasModel, actions }) {
     await this.invoke(async () => {
       await this.ensureInProjectRoot()
-      await this.generateBlueprint('service', name, { modelName })
+      await this.generateBlueprint('service', name, { modelName, hasModel, actions })
     })
   }
 }

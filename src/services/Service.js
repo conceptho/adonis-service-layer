@@ -11,19 +11,23 @@ module.exports = (Database, BaseRelation, Logger, Env, Model) => {
       return new Proxy(this, proxyHandler)
     }
 
-    get ModelName () {
+    static get ModelName () {
       return 'Model'
     }
 
-    get hasModel () {
+    static get hasModel () {
       return true
     }
 
-    get Model () {
+    static get Model () {
       if (!this.$model) {
         this.$model = use(this.ModelName)
       }
       return this.$model
+    }
+
+    get Model () {
+      return this.constructor.Model
     }
 
     /**
@@ -45,8 +49,8 @@ module.exports = (Database, BaseRelation, Logger, Env, Model) => {
         this.$bootedBy = []
       }
 
-      if (this.$bootedBy.indexOf(this.constructor.name) < 0) {
-        this.$bootedBy.push(this.constructor.name)
+      if (this.$bootedBy.indexOf(this.name) < 0) {
+        this.$bootedBy.push(this.name)
         if (this.hasModel) {
           this.Model.boot()
           const modelInstance = new (this.Model)()
@@ -98,7 +102,7 @@ module.exports = (Database, BaseRelation, Logger, Env, Model) => {
         return new ServiceResponse({ data: modelFound })
       }
 
-      const newModel = new this.$model(modelData)
+      const newModel = new this.Model(modelData)
       return this.create({ model: newModel, serviceContext })
     }
 

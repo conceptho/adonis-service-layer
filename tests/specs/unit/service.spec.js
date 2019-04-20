@@ -47,7 +47,7 @@ test.group('base service', group => {
 
     ioc.fake('App/Services/UserService', () => {
       class UserService extends Service {
-        get ModelName () {
+        static get ModelName () {
           return 'App/Models/User'
         }
 

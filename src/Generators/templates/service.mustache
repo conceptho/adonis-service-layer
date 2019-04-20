@@ -1,10 +1,54 @@
 'use strict'
 /** @type {typeof import('@conceptho/adonis-service-layer/src/services/Service')} */
 const { Service } = use('Conceptho/Services')
-const {{name}}Model = use('{{{modelName}}}')
-
 
 class {{name}} extends Service {
+    static get ModelName () {
+        return '{{{modelName}}}'
+    }
+
+    static get hasModel () {
+    @if(hasModel)
+        return true
+    @else
+        return false
+    @endif
+    }
+{{#actions}}
+    /**
+    * Creates and persists a new entity handled by this service in the database.
+    *
+    * @param {Object} param
+    * @param {Model} param.model Model instance
+    * @param {ServiceContext} param.trx Knex transaction
+    */
+    async actionCreate ({ model, serviceContext = {} }) {
+        return super.create({ model, serviceContext })
+    }
+
+    /**
+    * Updates an entity
+    *
+    * @param {Object} param
+    * @param {Model} param.model Model instance
+    * @param {Transaction} param.trx Knex transaction
+    */
+    async actionUpdate ({ model, serviceContext = {} }) {
+        return super.update({ model, serviceContext })
+    }
+
+    /**
+    * Deletes an entity
+    *
+    * @param {Object} param
+    * @param {Model} param.model Model instance
+    * @param {Boolean} softDelete If true, performs a soft delete. Defaults to false
+    * @throws {ServiceException} If model doesnt support softDelete and it is required
+    */
+    async actionDelete ({ model, serviceContext = {} }, softDelete) {
+        return super.delete({ model, serviceContext }, softDelete)
+    }
+{{/actions}}
 }
 
-module.exports = new {{name}}({{name}}Model)
+module.exports = new {{name}}()
