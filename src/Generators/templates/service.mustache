@@ -8,11 +8,12 @@ class {{name}} extends Service {
     }
 
     static get hasModel () {
-    @if(hasModel)
+    {{#hasModel}}
         return true
-    @else
+    {{/hasModel}}
+    {{^hasModel}}
         return false
-    @endif
+    {{/hasModel}}
     }
 {{#actions}}
     /**
