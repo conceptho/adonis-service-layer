@@ -69,6 +69,7 @@
   ],
   "include": [
     "./src/**/*",
-    "./typings/**/*"
+    "./typings/**/*",
+    "../../.WebStorm2018.3/config/javascript/nodejs/11.6.0/node-typings/node_modules/@types/node/globals.d.ts"
   ]
 }

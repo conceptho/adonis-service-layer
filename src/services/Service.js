@@ -7,6 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     step((generator = generator.apply(thisArg, _arguments || [])).next())
   })
 }
+Object.defineProperty(exports, '__esModule', { value: true })
 const ServiceResponse = require('../services/ServiceResponse')
 const { ServiceException } = require('../exceptions/runtime')
 const proxyHandler = require('./proxyHandler')
@@ -25,7 +26,7 @@ module.exports = (Database, BaseRelation, Logger, Env, Model) => {
     }
     static get Model () {
       if (!this.$model) {
-        this.$model = use(this.constructor.ModelName)
+        this.$model = use(this.ModelName)
       }
       return this.$model
     }

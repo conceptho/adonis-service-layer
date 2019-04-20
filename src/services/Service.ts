@@ -1,3 +1,6 @@
+import {Env, Logger, Lucid} from "../../typings/@adonisjs";
+import Model = Lucid.Model;
+
 const ServiceResponse = require('../services/ServiceResponse')
 const { ServiceException } = require('../exceptions/runtime')
 const proxyHandler = require('./proxyHandler')
@@ -5,11 +8,13 @@ const proxyHandler = require('./proxyHandler')
 const { reduce } = require('lodash')
 const util = require('util')
 
-module.exports = (Database: any, BaseRelation: any, Logger: any, Env: any, Model: any) => {
+module.exports = (Database: any, BaseRelation: any, Logger: Logger, Env: Env, Model: Model) => {
     class Service {
         [x: string]: any;
         static $model: any
         static $bootedBy: Array<string>
+
+        ['constructor']: typeof Service
 
         constructor () {
             return new Proxy(this, proxyHandler)
@@ -25,7 +30,7 @@ module.exports = (Database: any, BaseRelation: any, Logger: any, Env: any, Model
 
         static get Model () {
             if (!this.$model) {
-                this.$model = use((this.constructor as typeof Service).ModelName)
+                this.$model = use(this.ModelName)
             }
             return this.$model
         }
