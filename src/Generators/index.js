@@ -109,7 +109,7 @@ generators.service = {
   getFilePath (name, options) {
     const baseName = path.basename(name)
     const normalizedName = name.replace(baseName, this.getFileName(baseName))
-    return path.join(options.appRoot, options.appDir, options.dirs.models, normalizedName) + '.js'
+    return path.join(options.appRoot, options.appDir, options.dirs.services, normalizedName) + '.js'
   }
 }
 
