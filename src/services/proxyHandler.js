@@ -22,9 +22,12 @@ const applyHandler = {
       onEntryFunctionsArray.map(func => func(argumentsList, target))
     )
     const targetWithBind = (target.bind(thisArg))
-    const actionResult = targetWithBind.constructor.name === 'AsyncFunction'
+    let actionResult = targetWithBind.constructor.name === 'AsyncFunction'
       ? await targetWithBind(...argumentsList)
       : targetWithBind(...argumentsList)
+    if (actionResult instanceof Promise) {
+      actionResult = await actionResult
+    }
     const resultOnExitFunctions = await Promise.all(
       onExitFunctionsArray.map(func => func(argumentsList, actionResult, target))
     )
