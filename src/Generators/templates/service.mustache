@@ -41,6 +41,17 @@ class {{name}} extends Service {
     }
 
     /**
+    * Creates and persists a new entity using the Data instead of the Model as argument
+    *
+    * @param modelData
+    * @param serviceContext
+    * @returns {Promise<*>}
+    */
+    async actionCreateWithData ({ modelData, serviceContext = {} }) {
+        return this.actionCreateWithData({ modelData, serviceContext })
+    }
+
+    /**
     * Updates an entity
     *
     * @param {Object} param

@@ -96,6 +96,18 @@ module.exports = (Database, BaseRelation, Logger, Env, Model) => {
     }
 
     /**
+     * Creates and persists a new entity using the Data instead of the Model as argument
+     *
+     * @param modelData
+     * @param serviceContext
+     * @returns {Promise<*>}
+     */
+    async actionCreateWithData ({ modelData, serviceContext = {} }) {
+      const model = new this.Model(modelData)
+      return this.create({ model, serviceContext })
+    }
+
+    /**
      * Finds an entity with given where clauses or creates it if it does not exists.
      *
      * @param {Object} param
