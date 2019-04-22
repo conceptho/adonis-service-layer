@@ -48,7 +48,7 @@ class {{name}} extends Service {
     * @returns {Promise<*>}
     */
     async actionCreateWithData ({ modelData, serviceContext = {} }) {
-        return this.actionCreateWithData({ modelData, serviceContext })
+        return super.actionCreateWithData({ modelData, serviceContext })
     }
 
     /**
