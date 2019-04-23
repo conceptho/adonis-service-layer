@@ -17,3 +17,19 @@ Each middleware is defined in its own namespace:
 |:----------------------------------------:|
 | `Conceptho/Middlewares/UseTransaction`   |
 | `Conceptho/Middlewares/HeaderPagination` |
+
+
+### Make Command Line
+
+1. Register Command Lines in `start/app.js`
+
+```js
+
+const commands = [
+  ...,
+  '@conceptho/adonis-service-layer/src/Commands/Make/Controller',
+  '@conceptho/adonis-service-layer/src/Commands/Make/Model',
+  '@conceptho/adonis-service-layer/src/Commands/Make/Service'
+]
+
+```

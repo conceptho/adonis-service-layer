@@ -1,0 +1,10 @@
+'use strict'
+/** @type {typeof import('@conceptho/adonis-service-layer/src/services/Service')} */
+const { Service } = use('Conceptho/Services')
+const {{name}}Model = use('{{{modelName}}}')
+
+
+class {{name}} extends Service {
+}
+
+module.exports = new {{name}}({{name}}Model)

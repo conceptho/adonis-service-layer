@@ -53,7 +53,11 @@
     "supertest": "^4.0.2"
   },
   "dependencies": {
-    "lodash": "^4.17.11"
+    "cli-step": "^1.0.2",
+    "debug": "^4.1.1",
+    "gradient-string": "^1.2.0",
+    "lodash": "^4.17.11",
+    "pluralize": "^7.0.0"
   },
   "husky": {
     "hooks": {
