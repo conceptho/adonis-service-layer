@@ -19,7 +19,7 @@ const applyHandler = {
     const onEntryFunctionsArray = thisArg['onEntryHooks']().map(v => thisArg[v]).filter(v => _isFunction(v))
     const onExitFunctionsArray = thisArg['onExitHooks']().map(v => thisArg[v]).filter(v => _isFunction(v))
     const resultOnEntryFunctions = await Promise.all(
-      onEntryFunctionsArray.map(func => func(argumentsList, target))
+      onEntryFunctionsArray.map(func => func.bind(thisArg)(argumentsList, target))
     )
     const targetWithBind = (target.bind(thisArg))
     let actionResult = targetWithBind.constructor.name === 'AsyncFunction'
@@ -29,7 +29,7 @@ const applyHandler = {
       actionResult = await actionResult
     }
     const resultOnExitFunctions = await Promise.all(
-      onExitFunctionsArray.map(func => func(argumentsList, actionResult, target))
+      onExitFunctionsArray.map(func => func.bind(thisArg)(argumentsList, actionResult, target))
     )
     const info = {}
     info[`${target.name}MetaData`] = { resultOnEntryFunctions, resultOnExitFunctions }
