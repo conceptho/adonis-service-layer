@@ -1,10 +1,104 @@
 'use strict'
 /** @type {typeof import('@conceptho/adonis-service-layer/src/services/Service')} */
 const { Service } = use('Conceptho/Services')
-const {{name}}Model = use('{{{modelName}}}')
-
 
 class {{name}} extends Service {
+
+    {{#hasModel}}
+    /**
+    * Returns the path for the Model related to this Service
+    * @returns {string}
+    * @constructor
+    */
+    static get ModelName () {
+        return '{{{modelName}}}'
+    }
+    {{/hasModel}}
+
+    /**
+    * Returns if this Service is related to a Model
+    * @returns {boolean}
+    */
+    static get hasModel () {
+    {{#hasModel}}
+        return true
+    {{/hasModel}}
+    {{^hasModel}}
+        return false
+    {{/hasModel}}
+    }
+
+{{#actions}}
+    /**
+    * Creates and persists a new entity handled by this service in the database.
+    *
+    * @param {Object} param
+    * @param {Model} param.model Model instance
+    * @param {ServiceContext} param.trx Knex transaction
+    */
+    async actionCreate ({ model, serviceContext = {} }) {
+        return super.actionCreate({ model, serviceContext })
+    }
+
+    /**
+    * Creates and persists a new entity using the Data instead of the Model as argument
+    *
+    * @param modelData
+    * @param serviceContext
+    * @returns {Promise<*>}
+    */
+    async actionCreateWithData ({ modelData, serviceContext = {} }) {
+        return super.actionCreateWithData({ modelData, serviceContext })
+    }
+
+    /**
+    * Updates an entity
+    *
+    * @param {Object} param
+    * @param {Model} param.model Model instance
+    * @param {Transaction} param.trx Knex transaction
+    */
+    async actionUpdate ({ model, serviceContext = {} }) {
+        return super.actionUpdate({ model, serviceContext })
+    }
+
+    /**
+    * Deletes an entity
+    *
+    * @param {Object} param
+    * @param {Model} param.model Model instance
+    * @param {Boolean} softDelete If true, performs a soft delete. Defaults to false
+    * @throws {ServiceException} If model doesnt support softDelete and it is required
+    */
+    async actionDelete ({ model, serviceContext = {} }, softDelete) {
+        return super.actionDelete({ model, serviceContext }, softDelete)
+    }
+
+    /**
+    * Finds an entity with given where clauses or creates it if it does not exists.
+    *
+    * @param {Object} param
+    * @param {Object} whereAttributes Values to look for
+    * @param {Object} modelData If entity is not found, create a new matching this modelData. Defaults to whereAttributes
+    * @param {Transaction} param.trx Knex transaction
+    * @param {Object} params.byActive If true, filter only active records
+    */
+    async actionFindOrCreate ({ whereAttributes, modelData = whereAttributes, serviceContext, byActive = false }) {
+        return super.actionFindOrCreate({ whereAttributes, modelData, serviceContext, byActive })
+    }
+
+    /**
+    * Finds an entity if it exists and returns it.
+    *
+    * @param {Object} params
+    * @param {Object} params.whereAttributes Values to look for
+    * @param {Object} params.byActive If true, filter only active records
+    * @returns {ServiceResponse} Response
+    */
+    async actionFind ({ whereAttributes, byActive = false, serviceContext }) {
+        return super.actionFind({ whereAttributes, byActive, serviceContext })
+    }
+{{/actions}}
 }
 
-module.exports = new {{name}}({{name}}Model)
+module.exports = new {{name}}()

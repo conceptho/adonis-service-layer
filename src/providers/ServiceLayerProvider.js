@@ -29,10 +29,11 @@ class ServiceLayerProvider extends ServiceProvider {
   registerServices () {
     this.app.bind('Conceptho/Services', () => {
       const BaseRelation = use('@adonisjs/lucid/src/Lucid/Relations/BaseRelation')
+      const Logger = use('Logger')
+      const Env = use('Env')
       const { Model } = use('Conceptho/Models')
-
       return {
-        Service: require('../services/Service')(use('Database'), BaseRelation, Model),
+        Service: require('../services/Service')(use('Database'), BaseRelation, Logger, Env, Model),
         ServiceResponse: require('../services/ServiceResponse'),
         ServiceContext: require('../services/ServiceContext')(this.app.use('Database'))
       }

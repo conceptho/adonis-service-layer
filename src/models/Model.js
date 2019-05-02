@@ -67,18 +67,34 @@ module.exports = (AdonisModel, Validator) =>
       return !!affected
     }
 
+    /**
+     * Array of function names for the related models
+     * @returns {Array}
+     */
     static get relations () {
       return []
     }
 
+    /**
+     * Object with Validation rules for this Model
+     * @returns {{}}
+     */
     static get validationRules () {
       return {}
     }
 
+    /**
+     * Object with the validation messages for this Model
+     * @returns {{}}
+     */
     static get validationMessages () {
       return {}
     }
 
+    /**
+     * Object with the sanitization rules for this Model
+     * @returns {{}}
+     */
     static get sanitizeRules () {
       return {}
     }

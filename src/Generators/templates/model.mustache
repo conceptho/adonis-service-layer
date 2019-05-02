@@ -4,6 +4,42 @@
 const { Model } = use('Conceptho/Models')
 
 class {{name}} extends Model {
+
+    static boot() {
+        super.boot()
+    }
+
+    /**
+    * Array of function names for the related models
+    * @returns {Array}
+    */
+    static get relations () {
+        return []
+    }
+
+    /**
+    * Object with Validation rules for this Model
+    * @returns {{}}
+    */
+    static get validationRules () {
+        return {}
+    }
+
+    /**
+    * Object with the validation messages for this Model
+    * @returns {{}}
+    */
+    static get validationMessages () {
+        return {}
+    }
+
+    /**
+    * Object with the sanitization rules for this Model
+    * @returns {{}}
+    */
+    static get sanitizeRules () {
+        return {}
+    }
 }
 
 module.exports = {{name}}
