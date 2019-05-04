@@ -40,6 +40,18 @@ class {{name}} extends Model {
     static get sanitizeRules () {
         return {}
     }
+
+
+    /**
+     * Object with options for the filter function in a query builder
+     * Example: 
+     * The type value could be any comparison operator for sql including the LIKE
+     * { id: { type: '=' }}
+     */
+    static get filterOptions () {
+      return {}
+    }
+
 }
 
 module.exports = {{name}}

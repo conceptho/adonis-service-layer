@@ -44,6 +44,20 @@ module.exports = (AdonisModel, Validator) =>
       return query.andWhere({ deleted: 0 })
     }
 
+    static scopeFilter (query, filters) {
+      const filterOptionsKeys = Object.keys(this.filterOptions)
+      filters = _.pick(filters, filterOptionsKeys)
+      const filterKeys = Object.keys(filters)
+      return filterKeys.reduce((query, filterKey) => {
+        const filterValue = filters[filterKey].replace(/(^>=|^<=|^<>|^>|^<)/, '')
+        const filterOption = this.filterOptions[filterKey]
+        const filterOperation = filters[filterKey].match(/(^>=|^<=|^<>|^>|^<)/)
+        const operation = filterOption.type || (filterOperation ? filterOperation[0] : '=')
+        const isLikeOperation = operation.toLowerCase().indexOf('like') >= 0
+        return query.where(filterKey, operation, isLikeOperation ?  `%${filterValue}%` : filterValue)
+      }, query)
+    }
+
     /**
      *
      * @param {Object} transaction Knex transaction
@@ -97,6 +111,16 @@ module.exports = (AdonisModel, Validator) =>
      */
     static get sanitizeRules () {
       return {}
+    }
+    
+    /**
+     * Object with options for the filter function in a query builder
+     */
+    static get filterOptions () {
+      return {
+        // The type value could be any comparison operator for sql including the LIKE
+        id: { type: '=' }
+      }
     }
 
     static get Serializer () {
