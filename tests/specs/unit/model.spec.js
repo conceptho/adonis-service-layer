@@ -72,10 +72,10 @@ test.group('base model', group => {
     const User = use('App/Models/User')
 
     const users = await User.createMany([{ email: '1234@email.com' }, { email: '5678@email.com' }])
-    const searchedUsers = await User.query().filter({ email: '@email.com' }).fetch()
+    const searchedUsers = await User.query().filter({ email: '1234@' }).fetch()
 
     assert.deepEqual(
-      users.map(user => pick(user.toJSON(), ['id', 'email'])),
+      [pick(users[0].toJSON(), ['id', 'email'])],
       searchedUsers.toJSON().map(user => pick(user, ['id', 'email']))
     )
   })
