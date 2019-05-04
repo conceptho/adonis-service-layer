@@ -7,9 +7,11 @@ module.exports = QueryBuilder => {
    */
   return class Controller {
     /**
-     * Expand the relations of a model
+     * Expand the relations of a model or query
+     * in the case of a query returns the query with the expanded values applied (with)
+     * in the case of a model returns a promise for expanding the relations 
      */
-    async applyExpand ({ data, expand, blackList = [], whiteList = [] }) {
+    applyExpand ({ data, expand, blackList = [], whiteList = [] }) {
       let expandArray = expand
       let expandedData = data
 
@@ -26,7 +28,7 @@ module.exports = QueryBuilder => {
             expandedData = expandedData.with(expandArray[i])
           }
 
-          return expandedData.fetch()
+          return expandedData
         }
 
         return data.loadMany(expandArray)

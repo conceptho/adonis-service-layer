@@ -90,7 +90,7 @@ test.group('base controller', group => {
     const User = use('App/Models/User')
 
     const controller = new Controller()
-    const result = await controller.applyExpand({ data: User.query(), expand: 'profile', whilteList: ['profile'] })
+    const result = await controller.applyExpand({ data: User.query(), expand: 'profile', whilteList: ['profile'] }).fetch()
 
     assert.isArray(result.rows)
   })
