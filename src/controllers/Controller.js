@@ -9,7 +9,7 @@ module.exports = QueryBuilder => {
     /**
      * Expand the relations of a model or query
      * in the case of a query returns the query with the expanded values applied (with)
-     * in the case of a model returns a promise for expanding the relations 
+     * in the case of a model returns a promise for expanding the relations
      */
     applyExpand ({ data, expand, blackList = [], whiteList = [] }) {
       let expandArray = expand
