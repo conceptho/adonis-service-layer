@@ -46,7 +46,7 @@ module.exports = (AdonisModel, Validator) =>
 
     static scopeFilter (query, filters) {
       const filterOptionsKeys = Object.keys(this.filterOptions)
-      filters = _.pick(filters, filterOptionsKeys)
+      filters = pick(filters, filterOptionsKeys)
       const filterKeys = Object.keys(filters)
       return filterKeys.reduce((query, filterKey) => {
         const filterValue = filters[filterKey].replace(/(^>=|^<=|^<>|^>|^<)/, '')
@@ -54,7 +54,7 @@ module.exports = (AdonisModel, Validator) =>
         const filterOperation = filters[filterKey].match(/(^>=|^<=|^<>|^>|^<)/)
         const operation = filterOption.type || (filterOperation ? filterOperation[0] : '=')
         const isLikeOperation = operation.toLowerCase().indexOf('like') >= 0
-        return query.where(filterKey, operation, isLikeOperation ?  `%${filterValue}%` : filterValue)
+        return query.where(filterKey, operation, isLikeOperation ? `%${filterValue}%` : filterValue)
       }, query)
     }
 
@@ -112,7 +112,7 @@ module.exports = (AdonisModel, Validator) =>
     static get sanitizeRules () {
       return {}
     }
-    
+
     /**
      * Object with options for the filter function in a query builder
      */

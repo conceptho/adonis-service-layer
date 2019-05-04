@@ -26,6 +26,12 @@ test.group('base model', group => {
             email: 'email'
           }
         }
+
+        static get filterOptions () {
+          return {
+            email: { type: 'LIKE' }
+          }
+        }
       })
 
     ioc.fake('App/Models/Profile', () =>
@@ -60,6 +66,18 @@ test.group('base model', group => {
 
     const userProfile = await user.profile().fetch()
     assert.deepEqual(pick(userProfile.toJSON(), 'user_id'), { user_id: user.id })
+  })
+
+  test('should be able to query data using the scopeFilter and filterOptions', async assert => {
+    const User = use('App/Models/User')
+
+    const users = await User.createMany([{ email: '1234@email.com' }, { email: '5678@email.com' }])
+    const searchedUsers = await User.query().filter({ email: '@email.com' }).fetch()
+
+    assert.deepEqual(
+      users.map(user => pick(user.toJSON(), ['id', 'email'])),
+      searchedUsers.toJSON().map(user => pick(user, ['id', 'email']))
+    )
   })
 
   test('should sanitize before save', async assert => {
