@@ -12,7 +12,7 @@ module.exports = QueryBuilder => {
      * in the case of a model returns a promise for expanding the relations
      */
     applyExpand ({ data, expand, blackList = [], whiteList = [] }) {
-      let expandArray = expand
+      let expandArray = expand || []
       let expandedData = data
 
       if (typeof expandArray === 'string') {
