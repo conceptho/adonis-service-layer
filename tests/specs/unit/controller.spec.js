@@ -8,7 +8,6 @@ test.group('base controller', group => {
 
     const { Model } = use('Conceptho/Models')
     const { Controller } = use('Conceptho/Controllers')
-    const { ServiceResponse } = use('Conceptho/Services')
 
     ioc.fake('App/Models/User', () =>
       class User extends Model {
