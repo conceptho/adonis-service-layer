@@ -8,6 +8,7 @@ test.group('base controller', group => {
 
     const { Model } = use('Conceptho/Models')
     const { Controller } = use('Conceptho/Controllers')
+    const { ServiceResponse } = use('Conceptho/Services')
 
     ioc.fake('App/Models/User', () =>
       class User extends Model {
@@ -93,5 +94,37 @@ test.group('base controller', group => {
     const result = await controller.applyExpand({ data: User.query(), expand: 'profile', whilteList: ['profile'] }).fetch()
 
     assert.isArray(result.rows)
+  })
+
+  test('verifyServiceResponse should return data', async assert => {
+    const { ServiceResponse } = use('Conceptho/Services')
+    const Controller = use('App/Controllers/Controller')
+    const controller = new Controller()
+    const result = await controller.verifyServiceResponse({ serviceResponse: new ServiceResponse({ data: { working: true } }) })
+    assert.deepEqual(result, { working: true })
+  })
+  test('verifyServiceResponse should return a exception with status 500', async assert => {
+    assert.plan(1)
+    const Controller = use('App/Controllers/Controller')
+    const controller = new Controller()
+    try {
+      await controller.verifyServiceResponse({ serviceResponse: { working: false } })
+    } catch (e) {
+      const { code } = e
+      assert.equal(code, 500)
+    }
+  })
+
+  test('verifyServiceResponse should return a exception with status 400', async assert => {
+    assert.plan(1)
+    const { ServiceResponse } = use('Conceptho/Services')
+    const Controller = use('App/Controllers/Controller')
+    const controller = new Controller()
+    try {
+      await controller.verifyServiceResponse({ serviceResponse: new ServiceResponse({ error: { name: 'VALIDATION_EXCEPTION' } }) })
+    } catch (e) {
+      const { code } = e
+      assert.equal(code, 400)
+    }
   })
 })

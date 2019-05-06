@@ -13,7 +13,7 @@ class HttpCodeException extends LogicalException {
    */
   constructor (code, payload, message) {
     // super default args: message, status, code
-    super(undefined, undefined, code)
+    super(undefined, code, code)
 
     this.payload = payload
     this.message = message || defaultMessages[code]

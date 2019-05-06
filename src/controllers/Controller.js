@@ -40,7 +40,6 @@ module.exports = QueryBuilder => {
      */
     async verifyServiceResponse ({ response, serviceResponse, callback = async () => { } }) {
       const { error, data } = serviceResponse
-
       if (serviceResponse instanceof ServiceResponse) {
         if (!error) {
           if (data) {
@@ -48,7 +47,6 @@ module.exports = QueryBuilder => {
 
             return data
           }
-
           return response.noContent()
         } else {
           throw new HttpCodeException(400, error.name === 'VALIDATION_EXCEPTION' ? error.errorMessages : error.name)
