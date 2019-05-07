@@ -71,6 +71,7 @@ test.group('base model', group => {
   const user3 = { id: 3, email: '91011@email.com' }
   const filterOperators = [
     { field: 'id', operator: 'eq', value: 1, arrayValues: [user1] },
+    { field: 'id', operator: 'neq', value: 1, arrayValues: [user2, user3] },
     { field: 'email', operator: 'like', value: '1234', arrayValues: [user1] },
     { field: 'id', operator: 'gt', value: 1, arrayValues: [user2, user3] },
     { field: 'id', operator: 'gte', value: 1, arrayValues: [user1, user2, user3] },
