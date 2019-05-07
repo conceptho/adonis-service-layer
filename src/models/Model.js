@@ -2,7 +2,7 @@ const DefaultSerializer = require('../serializers/DefaultSerializer')
 
 const { ValidationException } = require('../exceptions/runtime')
 const { pick } = require('lodash')
-const { helper: filterMapping, operatorMapping } = require('./filter')
+const { helper: filterMapping } = require('./filter')
 
 module.exports = (AdonisModel, Validator) =>
   class Model extends AdonisModel {
