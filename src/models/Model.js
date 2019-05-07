@@ -2,6 +2,7 @@ const DefaultSerializer = require('../serializers/DefaultSerializer')
 
 const { ValidationException } = require('../exceptions/runtime')
 const { pick } = require('lodash')
+const { helper: filterMapping, operatorMapping } = require('./filter')
 
 module.exports = (AdonisModel, Validator) =>
   class Model extends AdonisModel {
@@ -45,16 +46,26 @@ module.exports = (AdonisModel, Validator) =>
     }
 
     static scopeFilter (query, filters) {
-      const filterOptionsKeys = Object.keys(this.filterOptions)
-      filters = pick(filters, filterOptionsKeys)
-      const filterKeys = Object.keys(filters)
-      return filterKeys.reduce((query, filterKey) => {
-        const filterValue = filters[filterKey].replace(/(^>=|^<=|^<>|^>|^<)/, '')
-        const filterOption = this.filterOptions[filterKey]
-        const filterOperation = filters[filterKey].match(/(^>=|^<=|^<>|^>|^<)/)
-        const operation = filterOption.type || (filterOperation ? filterOperation[0] : '=')
-        const isLikeOperation = operation.toLowerCase().indexOf('like') >= 0
-        return query.where(filterKey, operation, isLikeOperation ? `%${filterValue}%` : filterValue)
+      const normalizedFilters = Object.keys(filters).map(key => {
+        const info = filterMapping(key)
+        info.value = filters[key]
+        return info
+      })
+      return normalizedFilters.reduce((query, filterInfo) => {
+        if (this.canBeFiltered.indexOf(filterInfo.name) >= 0) {
+          const operation = operatorMapping[filterInfo.operation]
+          console.log(operation)
+          if (operation) {
+            if (operation === 'BETWEEN') {
+              return query.whereBetween(filterInfo.name, filterInfo.value.split(',', 2))
+            } else if (operation === 'LIKE') {
+              return query.where(filterInfo.name.trim(), operation, `%${filterInfo.value}%`)
+            } else {
+              return query.where(filterInfo.name.trim(), operation, filterInfo.value)
+            }
+          }
+        }
+        return query
       }, query)
     }
 
@@ -114,13 +125,10 @@ module.exports = (AdonisModel, Validator) =>
     }
 
     /**
-     * Object with options for the filter function in a query builder
+     * Array with the attributes that can be filtered
      */
-    static get filterOptions () {
-      return {
-        // The type value could be any comparison operator for sql including the LIKE
-        id: { type: '=' }
-      }
+    static get canBeFiltered () {
+      return ['id']
     }
 
     static get Serializer () {

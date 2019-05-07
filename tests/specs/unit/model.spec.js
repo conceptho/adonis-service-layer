@@ -27,10 +27,8 @@ test.group('base model', group => {
           }
         }
 
-        static get filterOptions () {
-          return {
-            email: { type: 'LIKE' }
-          }
+        static get canBeFiltered () {
+          return ['email', 'id']
         }
       })
 
@@ -72,8 +70,7 @@ test.group('base model', group => {
     const User = use('App/Models/User')
 
     const users = await User.createMany([{ email: '1234@email.com' }, { email: '5678@email.com' }])
-    const searchedUsers = await User.query().filter({ email: '1234@' }).fetch()
-
+    const searchedUsers = await User.query().filter({ 'email:like': '1234@' }).fetch()
     assert.deepEqual(
       [pick(users[0].toJSON(), ['id', 'email'])],
       searchedUsers.toJSON().map(user => pick(user, ['id', 'email']))
