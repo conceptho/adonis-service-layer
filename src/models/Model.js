@@ -2,6 +2,7 @@ const DefaultSerializer = require('../serializers/DefaultSerializer')
 
 const { ValidationException } = require('../exceptions/runtime')
 const { pick } = require('lodash')
+const { helper: filterMapping } = require('./filter')
 
 module.exports = (AdonisModel, Validator) =>
   class Model extends AdonisModel {
@@ -42,6 +43,35 @@ module.exports = (AdonisModel, Validator) =>
      */
     static scopeActive (query) {
       return query.andWhere({ deleted: 0 })
+    }
+
+    static scopeFilter (query, filters) {
+      const normalizedFilters = Object.keys(filters).map(key => {
+        const info = filterMapping(key)
+        info.value = filters[key]
+        return info
+      })
+      return normalizedFilters.reduce((query, filterInfo) => {
+        const { operation, value, name } = filterInfo
+        if (this.canBeFiltered.indexOf(name) >= 0) {
+          if (operation) {
+            if (operation === 'BETWEEN') {
+              return query.whereBetween(name, value.split(',', 2))
+            } else if (operation === 'NOT BETWEEN') {
+              return query.whereNotBetween(name, value.split(',', 2))
+            } else if (operation === 'LIKE') {
+              return query.where(name, operation, `%${value}%`)
+            } else if (operation === 'IN') {
+              return query.whereIn(name, value.split(','))
+            } else if (operation === 'NOT IN') {
+              return query.whereNotIn(name, value.split(','))
+            } else {
+              return query.where(name, operation, value)
+            }
+          }
+        }
+        return query
+      }, query)
     }
 
     /**
@@ -97,6 +127,13 @@ module.exports = (AdonisModel, Validator) =>
      */
     static get sanitizeRules () {
       return {}
+    }
+
+    /**
+     * Array with the attributes that can be filtered
+     */
+    static get canBeFiltered () {
+      return ['id']
     }
 
     static get Serializer () {

@@ -26,6 +26,10 @@ test.group('base model', group => {
             email: 'email'
           }
         }
+
+        static get canBeFiltered () {
+          return ['email', 'id']
+        }
       })
 
     ioc.fake('App/Models/Profile', () =>
@@ -39,6 +43,7 @@ test.group('base model', group => {
   group.afterEach(async () => {
     await use('Database').raw('delete from profiles')
     await use('Database').raw('delete from users')
+    await use('Database').raw('ALTER TABLE users AUTO_INCREMENT=1')
   })
 
   test('should be able to define a model and query it', async assert => {
@@ -61,6 +66,36 @@ test.group('base model', group => {
     const userProfile = await user.profile().fetch()
     assert.deepEqual(pick(userProfile.toJSON(), 'user_id'), { user_id: user.id })
   })
+  const user1 = { id: 1, email: '1234@email.com' }
+  const user2 = { id: 2, email: '5678@email.com' }
+  const user3 = { id: 3, email: '91011@email.com' }
+  const filterOperators = [
+    { field: 'id', operator: 'eq', value: 1, arrayValues: [user1] },
+    { field: 'id', operator: 'neq', value: 1, arrayValues: [user2, user3] },
+    { field: 'email', operator: 'like', value: '1234', arrayValues: [user1] },
+    { field: 'id', operator: 'gt', value: 1, arrayValues: [user2, user3] },
+    { field: 'id', operator: 'gte', value: 1, arrayValues: [user1, user2, user3] },
+    { field: 'id', operator: 'lt', value: 2, arrayValues: [user1] },
+    { field: 'id', operator: 'lte', value: 2, arrayValues: [user1, user2] },
+    { field: 'id', operator: 'in', value: '1,2', arrayValues: [user1, user2] },
+    { field: 'id', operator: 'nin', value: '1,2', arrayValues: [user3] },
+    { field: 'id', operator: 'between', value: '1,3', arrayValues: [user1, user2, user3] },
+    { field: 'id', operator: 'nbetween', value: '1,3', arrayValues: [] }
+  ]
+
+  filterOperators.forEach(
+    ({ field, operator, value, arrayValues }) => test(`should be able to query data using the scopeFilter with operator '${operator}'`, async assert => {
+      const User = use('App/Models/User')
+      await User.createMany([{ email: '1234@email.com' }, { email: '5678@email.com' }, { email: '91011@email.com' }])
+      const filterData = {}
+      filterData[`${field}:${operator}`] = value
+      const searchedUsers = (await User.query().filter(filterData).fetch()).toJSON()
+      assert.deepEqual(
+        arrayValues,
+        searchedUsers.map(user => pick(user, ['id', 'email']))
+      )
+    })
+  )
 
   test('should sanitize before save', async assert => {
     const User = use('App/Models/User')

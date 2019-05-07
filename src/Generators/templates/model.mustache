@@ -40,6 +40,15 @@ class {{name}} extends Model {
     static get sanitizeRules () {
         return {}
     }
+
+
+    /**
+    * Array with the attributes that can be filtered
+    */
+    static get canBeFiltered () {
+        return ['id']
+    }
+
 }
 
 module.exports = {{name}}
