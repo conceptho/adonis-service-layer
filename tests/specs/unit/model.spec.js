@@ -68,21 +68,24 @@ test.group('base model', group => {
   })
   const user1 = { id: 1, email: '1234@email.com' }
   const user2 = { id: 2, email: '5678@email.com' }
+  const user3 = { id: 3, email: '91011@email.com' }
   const filterOperators = [
     { field: 'id', operator: 'eq', value: 1, arrayValues: [user1] },
     { field: 'email', operator: 'like', value: '1234', arrayValues: [user1] },
-    { field: 'id', operator: 'gt', value: 1, arrayValues: [user2] },
-    { field: 'id', operator: 'gte', value: 1, arrayValues: [user1, user2] },
+    { field: 'id', operator: 'gt', value: 1, arrayValues: [user2, user3] },
+    { field: 'id', operator: 'gte', value: 1, arrayValues: [user1, user2, user3] },
     { field: 'id', operator: 'lt', value: 2, arrayValues: [user1] },
     { field: 'id', operator: 'lte', value: 2, arrayValues: [user1, user2] },
     { field: 'id', operator: 'in', value: '1,2', arrayValues: [user1, user2] },
-    { field: 'id', operator: 'between', value: '0,3', arrayValues: [user1, user2] }
+    { field: 'id', operator: 'nin', value: '1,2', arrayValues: [user3] },
+    { field: 'id', operator: 'between', value: '1,3', arrayValues: [user1, user2, user3] },
+    { field: 'id', operator: 'nbetween', value: '1,3', arrayValues: [] }
   ]
 
   filterOperators.forEach(
     ({ field, operator, value, arrayValues }) => test(`should be able to query data using the scopeFilter with operator '${operator}'`, async assert => {
       const User = use('App/Models/User')
-      await User.createMany([{ email: '1234@email.com' }, { email: '5678@email.com' }])
+      await User.createMany([{ email: '1234@email.com' }, { email: '5678@email.com' }, { email: '91011@email.com' }])
       const filterData = {}
       filterData[`${field}:${operator}`] = value
       const searchedUsers = (await User.query().filter(filterData).fetch()).toJSON()

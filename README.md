@@ -33,3 +33,59 @@ const commands = [
 ]
 
 ```
+
+
+### Model Documentation
+
+1. The Model has an filter operation attached to the query builder with the name scopeFilter
+he is used to help the search possible used by query params in a request for example he has
+some operations mapping as defined based on some comparison operator and functions of sql:
+
+| operatorKey       | operation          | operatorDescription                         |
+| :---------------- | :----------------- | :----------------------------------------   |
+| gt                | '>'                | GREATER THEN                                |  
+| gte               | '>='               | GREATHER THEN EQUAL                         |
+| lt                | '<'                | LESS THEN                                   |
+| lte               | '<='               | LESS THEN EQUAL                             |
+| eq                | '='                | EQUAL                                       |
+| neq               | '<>'               | NOT EQUAL                                   |
+| in                | 'IN'               | IN A GROUP OF VALUES COMMA SEPARETED        |
+| nin               | 'NOT IN'           | NOT IN A GROUP OF VALUES COMMA SEPARETED    |
+| between           | 'BETWEEN'          | BETWEEN TWO VALUES                          |
+| nbetween          | 'NOT BETWEEN'      | NOT BETWEEN TWO VALUES                      |
+| like              | 'LIKE'             | SEARCH FOR DATA WITH THE SPECIFIED VALUE    | 
+
+1.1 to use the filter function and these operations the object provided to the function should have the  
+following signature considering you should also define the attributes in the model that can be used in 
+this function at the canBeFiltered static method in the Model:
+
+| value            | info                        |
+| :--------------- | : ------------------------- |
+| attr             | Name of the attribute       |
+| operatorKey      | Key of the operation filter to be used |
+| value            | Value that will be used with the operation |
+
+
+```js
+{ 'attr:operatorKey' : 'value' }
+```
+1.2 Example:
+```js
+...
+// app/Models/User.js
+const { Model } = use('Conceptho/Models')
+class User extends Model {
+  static get canBeFiltered () {
+    return ['id', 'email']
+  }
+}
+...
+
+const query = User.query()
+// Return all the Users with id lesser than 3
+const queryDataById = await query.filter({ 'id:lt': 3 }).fetch()
+
+// Returns all the Users that contain the pattern '@gmail.com'
+const queryDataByEmail = await query.filter({ 'email:like': '@gmail.com' }).fetch()
+
+```

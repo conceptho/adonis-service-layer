@@ -57,10 +57,14 @@ module.exports = (AdonisModel, Validator) =>
           if (operation) {
             if (operation === 'BETWEEN') {
               return query.whereBetween(name, value.split(',', 2))
+            } else if (operation === 'NOT BETWEEN') {
+              return query.whereNotBetween(name, value.split(',', 2))
             } else if (operation === 'LIKE') {
               return query.where(name, operation, `%${value}%`)
             } else if (operation === 'IN') {
               return query.whereIn(name, value.split(','))
+            } else if (operation === 'NOT IN') {
+              return query.whereNotIn(name, value.split(','))
             } else {
               return query.where(name, operation, value)
             }

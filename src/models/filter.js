@@ -7,7 +7,9 @@ const operatorMapping = {
   lte: '<=',
   like: 'LIKE',
   in: 'IN',
-  between: 'BETWEEN'
+  nin: 'NOT IN',
+  between: 'BETWEEN',
+  nbetween: 'NOT BETWEEN'
 }
 
 module.exports = {
