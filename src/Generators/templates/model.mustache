@@ -43,13 +43,10 @@ class {{name}} extends Model {
 
 
     /**
-     * Object with options for the filter function in a query builder
-     * Example: 
-     * The type value could be any comparison operator for sql including the LIKE
-     * { id: { type: '=' }}
-     */
-    static get filterOptions () {
-      return {}
+    * Array with the attributes that can be filtered
+    */
+    static get canBeFiltered () {
+        return ['id']
     }
 
 }
