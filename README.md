@@ -59,15 +59,13 @@ some operations mapping as defined based on some comparison operator and functio
 following signature considering you should also define the attributes in the model that can be used in 
 this function at the canBeFiltered static method in the Model:
 
-| value            | info                        |
-| :--------------- | : ------------------------- |
-| attr             | Name of the attribute       |
-| operatorKey      | Key of the operation filter to be used |
-| value            | Value that will be used with the operation |
-
-
 ```js
-{ 'attr:operatorKey' : 'value' }
+/**
+* 'attr' is the name of the attribute to be filtered
+* 'operatorKey' is the operatorKey to be used 
+* 'value' is the value to be used to filter
+*/
+const filterData = { 'attr:operatorKey' : 'value' }
 ```
 1.2 Example:
 ```js
