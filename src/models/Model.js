@@ -202,9 +202,9 @@ module.exports = (AdonisModel, Validator) =>
      * @return {Relation}
      */
     pivotRelation ({ relatedModel, foreignKey, relatedForeignKey, primaryKey, relatedPrimaryKey, type, pivotTable }) {
-      relatedModel = typeof (relatedModel) === 'string' ?
-          use(relatedModel) :
-          relatedModel
+      relatedModel = typeof (relatedModel) === 'string'
+        ? use(relatedModel)
+        : relatedModel
 
       foreignKey = foreignKey || this.constructor.foreignKey
       relatedForeignKey = relatedForeignKey || relatedModel.foreignKey
