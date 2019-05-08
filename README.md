@@ -90,6 +90,7 @@ this function at the canBeFiltered static method in the Model:
 2. The Model has an internal function of name pivotRelation, its a way to use the belongsToMany relationship
 considering the case were the relation has only one instance attached to it, the main objective of these is
 for easy handling all cases of relationships using only a function and the type related to it (hasOne, hasMany, belongsTo, belongsToMany)
+this relationship case needs a pivotTable for storing the data that defines this relation ship
 
     1. Considering the existence of these models:
         ```js
@@ -97,13 +98,13 @@ for easy handling all cases of relationships using only a function and the type 
          // app/Models/User.js
          class User extends Model {
            addresses () {
-             return this.pivotRelation({ relatedModel: 'App/Models/Address' })
+             return this.pivotRelation({ relatedModel: 'App/Models/Address', pivotTable: 'user_addresses' })
            }
          }
          // app/Models/Address.js
          class Address extends Model {
            user () {
-             return this.pivotRelation({ relatedModel: 'App/Models/User', type: 'hasOne' })
+             return this.pivotRelation({ relatedModel: 'App/Models/User', type: 'hasOne', pivotTable: 'user_addresses' })
            }
          }
         ```
