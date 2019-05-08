@@ -1,7 +1,6 @@
 const test = require('japa')
 
 const { ioc } = require('@adonisjs/fold')
-const { pick, range } = require('lodash')
 
 test.group('base schema', group => {
   group.before(async () => {
@@ -22,6 +21,22 @@ test.group('base schema', group => {
     ))
   })
 
+  group.afterEach(async () => {
+    await use('Database').raw('drop table if exists adonis_schema')
+    await use('Database').raw('drop table if exists user_profiles')
+    await Promise.all([
+      use('Database').raw('delete from profiles'),
+      use('Database').raw('delete from _user_posts'),
+      use('Database').raw('delete from _user_address')
+    ])
+    await Promise.all([
+      use('Database').raw('delete from posts'),
+      use('Database').raw('delete from addresses'),
+      use('Database').raw('delete from users')
+    ])
+    await use('Database').raw('ALTER TABLE users AUTO_INCREMENT=1')
+  })
+
   test('the up command should be runned successfuly', async assert => {
     assert.plan(2)
     const UserProfileSchema = use('Migrations/UserProfilesSchema')
@@ -40,6 +55,7 @@ test.group('base schema', group => {
     const UserProfileSchema = use('Migrations/UserProfilesSchema')
     const Migration = use('Adonis/Src/Migration')
     try {
+      await Migration.up({ UserProfileSchema })
       await Migration.down({ UserProfileSchema })
       assert.isTrue(true)
       await use('Database').table('user_profiles').select('*')
@@ -47,19 +63,4 @@ test.group('base schema', group => {
       assert.isTrue(true)
     }
   }).timeout(5000)
-
-  group.afterEach(async () => {
-    // await use('Database').raw('drop table if exists user_profiles')
-    await Promise.all([
-      use('Database').raw('delete from profiles'),
-      use('Database').raw('delete from _user_posts'),
-      use('Database').raw('delete from _user_address')
-    ])
-    await Promise.all([
-      use('Database').raw('delete from posts'),
-      use('Database').raw('delete from addresses'),
-      use('Database').raw('delete from users')
-    ])
-    await use('Database').raw('ALTER TABLE users AUTO_INCREMENT=1')
-  })
 })
