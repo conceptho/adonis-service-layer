@@ -8,6 +8,7 @@ class ServiceLayerProvider extends ServiceProvider {
     this.registerSerializers()
     this.registerControllers()
     this.registerMiddlewares()
+    this.registerSchema()
   }
 
   registerModels () {
@@ -24,6 +25,12 @@ class ServiceLayerProvider extends ServiceProvider {
       ...require('../exceptions/http'),
       ...require('../exceptions/runtime')
     }))
+  }
+
+  registerSchema () {
+    this.app.bind('Conceptho/Schema', () => (
+      require('./../schema/Schema')(use('Schema'))
+    ))
   }
 
   registerServices () {

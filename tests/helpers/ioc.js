@@ -16,6 +16,18 @@ async function registerProviders (ioc) {
 
   ioc.alias('Adonis/Src/Model', 'Model')
 
+  ioc.bind('Adonis/Src/Schema', () => {
+    return require('@adonisjs/lucid/src/Schema')
+  })
+
+  ioc.bind('Adonis/Src/Migration', () => {
+    const config = new Config()
+    config.set('database', { connection: 'testing', testing: dbConfig })
+    return new (require('@adonisjs/lucid/src/Migration'))(config, use('Database'))
+  })
+
+  ioc.alias('Adonis/Src/Schema', 'Schema')
+
   const providers = [
     path.join(__dirname, '../../node_modules/@adonisjs/framework/providers/AppProvider'),
     path.join(__dirname, '../../src/providers/ServiceLayerProvider')

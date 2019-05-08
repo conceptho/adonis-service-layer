@@ -38,4 +38,9 @@ test.group('service provider', group => {
 
     assert.isDefined(HeaderPagination)
   })
+
+  test('Conceptho/Schema', assert => {
+    const Schema = use('Conceptho/Schema')
+    assert.isDefined(Schema)
+  })
 })
