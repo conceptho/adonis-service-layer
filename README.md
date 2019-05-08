@@ -37,53 +37,73 @@ const commands = [
 
 ### Model Documentation
 
-1. The Model has an filter operation attached to the query builder with the name scopeFilter
+1.  The Model has an filter operation attached to the query builder with the name scopeFilter
 he is used to help the search possible used by query params in a request for example he has
 some operations mapping as defined based on some comparison operator and functions of sql:
 
-| operatorKey       | operation          | operatorDescription                         |
-| :---------------- | :----------------- | :----------------------------------------   |
-| gt                | '>'                | GREATER THEN                                |  
-| gte               | '>='               | GREATHER THEN EQUAL                         |
-| lt                | '<'                | LESS THEN                                   |
-| lte               | '<='               | LESS THEN EQUAL                             |
-| eq                | '='                | EQUAL                                       |
-| neq               | '<>'               | NOT EQUAL                                   |
-| in                | 'IN'               | IN A GROUP OF VALUES COMMA SEPARETED        |
-| nin               | 'NOT IN'           | NOT IN A GROUP OF VALUES COMMA SEPARETED    |
-| between           | 'BETWEEN'          | BETWEEN TWO VALUES                          |
-| nbetween          | 'NOT BETWEEN'      | NOT BETWEEN TWO VALUES                      |
-| like              | 'LIKE'             | SEARCH FOR DATA WITH THE SPECIFIED VALUE    | 
+    | operatorKey       | operation          | operatorDescription                         |
+    | :---------------- | :----------------- | :----------------------------------------   |
+    | gt                | '>'                | GREATER THEN                                |  
+    | gte               | '>='               | GREATHER THEN EQUAL                         |
+    | lt                | '<'                | LESS THEN                                   |
+    | lte               | '<='               | LESS THEN EQUAL                             |
+    | eq                | '='                | EQUAL                                       |
+    | neq               | '<>'               | NOT EQUAL                                   |
+    | in                | 'IN'               | IN A GROUP OF VALUES COMMA SEPARETED        |
+    | nin               | 'NOT IN'           | NOT IN A GROUP OF VALUES COMMA SEPARETED    |
+    | between           | 'BETWEEN'          | BETWEEN TWO VALUES                          |
+    | nbetween          | 'NOT BETWEEN'      | NOT BETWEEN TWO VALUES                      |
+    | like              | 'LIKE'             | SEARCH FOR DATA WITH THE SPECIFIED VALUE    | 
 
-1.1 to use the filter function and these operations the object provided to the function should have the  
+    1. to use the filter function and these operations the object provided to the function should have the  
 following signature considering you should also define the attributes in the model that can be used in 
 this function at the canBeFiltered static method in the Model:
+        ```js
+        /**
+        * 'attr' is the name of the attribute to be filtered
+        * 'operatorKey' is the operatorKey to be used 
+        * 'value' is the value to be used to filter
+        */
+        const filterData = { 'attr:operatorKey' : 'value' }
+        ```
+    2. Example:
+    
+        ```js
+        ...
+        // app/Models/User.js
+        const { Model } = use('Conceptho/Models')
+        class User extends Model {
+          static get canBeFiltered () {
+            return ['id', 'email']
+          }
+        }
+        ...
+        
+        const query = User.query()
+        // Return all the Users with id lesser than 3
+        const queryDataById = await query.filter({ 'id:lt': 3 }).fetch()
+        
+        // Returns all the Users that contain the pattern '@gmail.com'
+        const queryDataByEmail = await query.filter({ 'email:like': '@gmail.com' }).fetch()
+        ``` 
 
-```js
-/**
-* 'attr' is the name of the attribute to be filtered
-* 'operatorKey' is the operatorKey to be used 
-* 'value' is the value to be used to filter
-*/
-const filterData = { 'attr:operatorKey' : 'value' }
-```
-1.2 Example:
-```js
-...
-// app/Models/User.js
-const { Model } = use('Conceptho/Models')
-class User extends Model {
-  static get canBeFiltered () {
-    return ['id', 'email']
-  }
-}
-...
+2. The Model has an internal function of name pivotRelation, its a way to use the belongsToMany relationship
+considering the case were the relation has only one instance attached to it, the main objective of these is
+for easy handling all cases of relationships using only a function and the type related to it (hasOne, hasMany, belongsTo, belongsToMany)
 
-const query = User.query()
-// Return all the Users with id lesser than 3
-const queryDataById = await query.filter({ 'id:lt': 3 }).fetch()
-
-// Returns all the Users that contain the pattern '@gmail.com'
-const queryDataByEmail = await query.filter({ 'email:like': '@gmail.com' }).fetch()
-
-```
+    1. Considering the existence of these models:
+        ```js
+         const { Model } = use('Conceptho/Models')
+         // app/Models/User.js
+         class User extends Model {
+           addresses () {
+             return this.pivotRelation({ relatedModel: 'App/Models/Address' })
+           }
+         }
+         // app/Models/Address.js
+         class Address extends Model {
+           user () {
+             return this.pivotRelation({ relatedModel: 'App/Models/User', type: 'hasOne' })
+           }
+         }
+        ```

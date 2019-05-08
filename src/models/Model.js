@@ -3,6 +3,7 @@ const DefaultSerializer = require('../serializers/DefaultSerializer')
 const { ValidationException } = require('../exceptions/runtime')
 const { pick } = require('lodash')
 const { helper: filterMapping } = require('./filter')
+const Relation = require('./Relation')
 
 module.exports = (AdonisModel, Validator) =>
   class Model extends AdonisModel {
@@ -183,5 +184,32 @@ module.exports = (AdonisModel, Validator) =>
        */
       await this.constructor.$hooks.after.exec('delete', this)
       return !!affected
+    }
+
+    /**
+     * Returns an instance of @ref('BelongsTo') relation
+     *
+     * @method pivotRelation
+     *
+     * @param  {Class|String}      relatedModel
+     * @param  {String}            foreignKey
+     * @param  {String}            relatedForeignKey
+     * @param  {String}            primaryKey
+     * @param  {String}            relatedPrimaryKey
+     * @param {String}             type
+     * @param {String}             pivotTable
+     *
+     * @return {Relation}
+     */
+    pivotRelation ({ relatedModel, foreignKey, relatedForeignKey, primaryKey, relatedPrimaryKey, type, pivotTable }) {
+      relatedModel = typeof (relatedModel) === 'string' ?
+          use(relatedModel) :
+          relatedModel
+
+      foreignKey = foreignKey || this.constructor.foreignKey
+      relatedForeignKey = relatedForeignKey || relatedModel.foreignKey
+      primaryKey = primaryKey || this.constructor.primaryKey
+      relatedPrimaryKey = relatedPrimaryKey || relatedModel.primaryKey
+      return new Relation(this, relatedModel, primaryKey, foreignKey, relatedPrimaryKey, relatedForeignKey, type, pivotTable)
     }
   }
