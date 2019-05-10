@@ -6,18 +6,18 @@ module.exports = Database => {
     async handle (ctx, next) {
       const { response } = ctx
 
-      const serviceCtx = new ServiceContext({ ctx })
-      await serviceCtx.init()
+      const serviceContext = new ServiceContext({ ctx })
+      await serviceContext.init()
 
-      ctx.serviceCtx = serviceCtx
-      ctx.trx = serviceCtx.transaction
+      ctx.serviceContext = serviceContext
+      ctx.trx = serviceContext.transaction
 
       await next()
 
       if (response.response.statusCode >= 400) {
-        await serviceCtx.error()
+        await serviceContext.error()
       } else {
-        await serviceCtx.success()
+        await serviceContext.success()
       }
     }
   }
