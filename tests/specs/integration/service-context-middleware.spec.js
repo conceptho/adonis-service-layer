@@ -28,9 +28,9 @@ test.group('service context', group => {
     let errorCalled = false
     let successCalled = false
 
-    Route.get('/1', ({ response, serviceCtx }) => {
-      serviceCtx.onError(() => { errorCalled = true; return true })
-      serviceCtx.onSuccess(() => { successCalled = true; return true })
+    Route.get('/1', ({ response, serviceContext }) => {
+      serviceContext.onError(() => { errorCalled = true; return true })
+      serviceContext.onSuccess(() => { successCalled = true; return true })
 
       return response.status(400).send('oops')
     }).middleware('service')
@@ -43,9 +43,9 @@ test.group('service context', group => {
     errorCalled = false
     successCalled = false
 
-    Route.get('/2', ({ response, serviceCtx }) => {
-      serviceCtx.onError(() => { errorCalled = true; return true })
-      serviceCtx.onSuccess(() => { successCalled = true; return true })
+    Route.get('/2', ({ response, serviceContext }) => {
+      serviceContext.onError(() => { errorCalled = true; return true })
+      serviceContext.onSuccess(() => { successCalled = true; return true })
 
       return response.status(200).send('ok')
     }).middleware('service')
@@ -59,8 +59,8 @@ test.group('service context', group => {
   test('should commit transaction on success', async assert => {
     const User = use('App/Models/User')
 
-    Route.get('/3', async ({ response, serviceCtx }) => {
-      await User.create({ email: 'aprias' }, serviceCtx.transaction)
+    Route.get('/3', async ({ response, serviceContext }) => {
+      await User.create({ email: 'aprias' }, serviceContext.transaction)
       return response.status(200).send('ok')
     }).middleware('service')
 
@@ -71,8 +71,8 @@ test.group('service context', group => {
   test('should rollback transaction on error', async assert => {
     const User = use('App/Models/User')
 
-    Route.get('/4', async ({ response, serviceCtx }) => {
-      await User.create({ email: '111' }, serviceCtx.transaction)
+    Route.get('/4', async ({ response, serviceContext }) => {
+      await User.create({ email: '111' }, serviceContext.transaction)
       return response.status(400).send('oops')
     }).middleware('service')
 
