@@ -102,6 +102,7 @@ test.group('base controller', group => {
     const result = await controller.verifyServiceResponse({ serviceResponse: new ServiceResponse({ data: { working: true } }) })
     assert.deepEqual(result, { working: true })
   })
+
   test('verifyServiceResponse should return a exception with status 500', async assert => {
     assert.plan(1)
     const Controller = use('App/Controllers/Controller')

@@ -1,6 +1,4 @@
 const DefaultSerializer = require('../serializers/DefaultSerializer')
-
-const { ValidationException } = require('../exceptions/runtime')
 const { pick } = require('lodash')
 const { helper: filterMapping } = require('./filter')
 
@@ -148,7 +146,7 @@ module.exports = (AdonisModel, Validator) =>
         : Validator.validateAll(this.dirty, pick(validationRules, Object.keys(this.dirty)), validationMessages))
 
       if (validation.fails()) {
-        return { error: new ValidationException(`Validation failed for ${this.constructor.name}.`, validation.messages()) }
+        return { error: validation.messages() }
       }
 
       return { error: null }

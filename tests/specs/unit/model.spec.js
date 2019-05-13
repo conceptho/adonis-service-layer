@@ -146,13 +146,12 @@ test.group('base model', group => {
   )
 
   test('should implement validate', async assert => {
-    const ValidationException = require('../../../src/exceptions/runtime/ValidationException')
     const User = use('App/Models/User')
 
     let user = new User({ email: 'test' })
     const { error: validationError } = await user.validate()
 
-    assert.instanceOf(validationError, ValidationException)
+    assert.isArray(validationError)
 
     user = new User({ email: 'test@test.com' })
     const { error } = await user.validate()

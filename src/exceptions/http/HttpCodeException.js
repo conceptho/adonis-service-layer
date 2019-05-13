@@ -19,7 +19,10 @@ class HttpCodeException extends LogicalException {
     this.message = message || defaultMessages[code]
   }
 
-  handle ({ code, message, payload }, { response }) {
+  async handle ({ code, message, payload }, { response, serviceCtx }) {
+    if (serviceCtx) {
+      await serviceCtx.error()
+    }
     return response.status(code).send({ message, payload })
   }
 }
