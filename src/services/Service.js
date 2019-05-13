@@ -62,7 +62,7 @@ module.exports = (Database, BaseRelation, Logger, Env, Model) => {
         this.$bootedBy.push(this.name)
         if (this.hasModel) {
           this.Model.boot()
-          const modelInstance = new (this.Model)()
+          const modelInstance = new this.Model()
           if (!(modelInstance instanceof Model)) {
             throw new ServiceException(
               `Expected this service to handle a Model.
@@ -81,18 +81,26 @@ module.exports = (Database, BaseRelation, Logger, Env, Model) => {
      * @param {Model} param.model Model instance
      * @param {ServiceContext} param.trx Knex transaction
      */
-    async actionCreate ({ model, serviceContext = {} }) {
-      const { error } = await model.validate()
-
-      if (error) {
-        return new ServiceResponse({ error })
+    async actionCreate ({ model, modelData, serviceContext = {} }) {
+      if (!model && !modelData) {
+        return new ServiceResponse({ error: new ServiceException('Neither model or modelData provided for create.') })
       }
 
-      return this.executeCallback(serviceContext, async ({ transaction }) => {
-        await model.save(transaction)
+      if (model) {
+        const { error } = await model.validate()
 
-        return model
-      })
+        if (error) {
+          return new ServiceResponse({ error })
+        }
+
+        return this.executeCallback(serviceContext, async ({ transaction }) => {
+          await model.save(transaction)
+
+          return model
+        })
+      }
+
+      return this.actionCreateWithData({ modelData, serviceContext })
     }
 
     /**
@@ -116,8 +124,17 @@ module.exports = (Database, BaseRelation, Logger, Env, Model) => {
      * @param {Transaction} param.trx Knex transaction
      * @param {Object} params.byActive If true, filter only active records
      */
-    async actionFindOrCreate ({ whereAttributes, modelData = whereAttributes, serviceContext, byActive = false }) {
-      const { data: modelFound } = await this.find({ whereAttributes, byActive, serviceContext })
+    async actionFindOrCreate ({
+      whereAttributes,
+      modelData = whereAttributes,
+      serviceContext,
+      byActive = false
+    }) {
+      const { data: modelFound } = await this.find({
+        whereAttributes,
+        byActive,
+        serviceContext
+      })
 
       if (modelFound) {
         return new ServiceResponse({ data: modelFound })
@@ -194,7 +211,9 @@ module.exports = (Database, BaseRelation, Logger, Env, Model) => {
      * @returns {ServiceResponse} Response
      */
     async actionFind ({ whereAttributes, byActive = false, serviceContext }) {
-      let query = this.query({ byActive, serviceContext }).where(whereAttributes)
+      let query = this.query({ byActive, serviceContext }).where(
+        whereAttributes
+      )
 
       if (byActive) {
         query = query.active()
@@ -227,8 +246,16 @@ module.exports = (Database, BaseRelation, Logger, Env, Model) => {
      * @returns {ServiceResponse} result
      */
     checkResponses ({ responses = [], data }) {
-      const errors = reduce(responses, (res, value) => value.error ? [...res, value.error] : res, [])
-      const responsesData = reduce(responses, (res, value) => value.data ? [...res, value.data] : [...res, null], [])
+      const errors = reduce(
+        responses,
+        (res, value) => (value.error ? [...res, value.error] : res),
+        []
+      )
+      const responsesData = reduce(
+        responses,
+        (res, value) => (value.data ? [...res, value.data] : [...res, null]),
+        []
+      )
 
       return new ServiceResponse({
         error: errors.length ? errors : null,
@@ -267,7 +294,12 @@ module.exports = (Database, BaseRelation, Logger, Env, Model) => {
 
     onEntry (argumentsList, target) {
       if (Env.get('SERVICE_DEBUG', false) === 'true') {
-        Logger.info(`\n${target.name} onEntry\nargumentsList:\n${util.inspect(argumentsList, { colors: true, compact: false })}`)
+        Logger.info(
+          `\n${target.name} onEntry\nargumentsList:\n${util.inspect(
+            argumentsList,
+            { colors: true, compact: false }
+          )}`
+        )
         return true
       }
       return false
@@ -275,7 +307,17 @@ module.exports = (Database, BaseRelation, Logger, Env, Model) => {
 
     onExit (argumentsList, actionResult, target) {
       if (Env.get('SERVICE_DEBUG', false) === 'true') {
-        Logger.info(`\n${target.name} onExit status: ${actionResult.error ? 'error' : 'success'}\nargumentsList:\n${util.inspect(argumentsList, { colors: true, compact: false })}\nactionResult:\n${util.inspect(actionResult, { colors: true, compact: false })}`)
+        Logger.info(
+          `\n${target.name} onExit status: ${
+            actionResult.error ? 'error' : 'success'
+          }\nargumentsList:\n${util.inspect(argumentsList, {
+            colors: true,
+            compact: false
+          })}\nactionResult:\n${util.inspect(actionResult, {
+            colors: true,
+            compact: false
+          })}`
+        )
         return true
       }
       return false

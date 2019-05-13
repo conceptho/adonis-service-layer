@@ -43,7 +43,7 @@ class MakeService extends BaseCommand {
    * @return {String}
    */
   static get description () {
-    return 'Make a new lucid model'
+    return 'Make a new Conceptho Service.'
   }
 
   /**
