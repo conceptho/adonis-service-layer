@@ -96,7 +96,7 @@ test.group('base service', group => {
     const userb = new User({ email: 'test@test.com' })
 
     const { error: errorOne } = await UserService.create({ model: usera })
-    assert.isTrue(errorOne.constructor === ValidationException)
+    assert.isArray(errorOne)
 
     const { error: errorTwo } = await UserService.create({ model: userb })
     assert.isNull(errorTwo)
@@ -158,7 +158,7 @@ test.group('base service', group => {
     user.email = 'abcd'
 
     const { error } = await UserService.update({ model: user })
-    assert.strictEqual(error.constructor, ValidationException)
+    assert.isArray(error)
     assert.isTrue(user.isDirty)
   })
 

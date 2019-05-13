@@ -49,10 +49,10 @@ module.exports = QueryBuilder => {
           }
           return response.noContent()
         } else {
-          throw new HttpCodeException(400, error.name === 'VALIDATION_EXCEPTION' ? error.errorMessages : error.name)
+          throw new HttpCodeException(400, error)
         }
       } else {
-        throw new HttpCodeException(500, data)
+        throw new HttpCodeException(500, error)
       }
     }
 
