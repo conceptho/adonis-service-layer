@@ -63,11 +63,10 @@ module.exports = QueryBuilder => {
       redirectParamWhenIsOk = 'back',
       redirectParamWhenItsNot = 'back',
       callbackWhenIsNotOk = async () => {},
-      callbackWhenIsOk = async () => {},
-      serviceContext = null
+      callbackWhenIsOk = async () => {}
      }) {
       try {
-        await this.verifyServiceResponse({ response, serviceResponse, callbackWhenIsOk, serviceContext })
+        await this.verifyServiceResponse({ response, serviceResponse, callbackWhenIsOk })
         return response.redirect(redirectParamWhenIsOk)
       } catch (e) {
         await callbackWhenIsNotOk(serviceResponse.data)
