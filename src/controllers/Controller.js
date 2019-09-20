@@ -1,5 +1,6 @@
 const ServiceResponse = require('../services/ServiceResponse')
 const HttpCodeException = require('../exceptions/http/HttpCodeException')
+const defaults = require('lodash/defaults')
 
 module.exports = QueryBuilder => {
   /**
@@ -36,23 +37,32 @@ module.exports = QueryBuilder => {
     }
 
     /**
+     * Inject the ServiceContext if does not exist on the error.
+     * @param {*} error 
+     * @param {*} serviceContext 
+     */
+    _injectServiceContextOnError(error = {}, serviceContext) {
+      return defaults(error, { serviceContext })
+    }
+
+    /**
      * Verify a response returned by a Service.
      */
-    async verifyServiceResponse ({ response, serviceResponse, callback = async () => { } }) {
+    async verifyServiceResponse ({ response, serviceResponse, callback = async () => { }, serviceContext = null }) {
       const { error, data } = serviceResponse
+  
       if (serviceResponse instanceof ServiceResponse) {
         if (!error) {
           if (data) {
             await callback(data)
-
             return data
           }
           return response.noContent()
         } else {
-          throw new HttpCodeException(400, error)
+          throw new HttpCodeException(400, this._injectServiceContextOnError(error, serviceContext))
         }
       } else {
-        throw new HttpCodeException(500, error)
+        throw new HttpCodeException(500, this._injectServiceContextOnError(error, serviceContext))
       }
     }
 
@@ -62,9 +72,11 @@ module.exports = QueryBuilder => {
       redirectParamWhenIsOk = 'back',
       redirectParamWhenItsNot = 'back',
       callbackWhenIsNotOk = async () => {},
-      callbackWhenIsOk = async () => {} }) {
+      callbackWhenIsOk = async () => {},
+      serviceContext = null
+     }) {
       try {
-        await this.verifyServiceResponse({ response, serviceResponse, callbackWhenIsOk })
+        await this.verifyServiceResponse({ response, serviceResponse, callbackWhenIsOk, serviceContext })
         return response.redirect(redirectParamWhenIsOk)
       } catch (e) {
         await callbackWhenIsNotOk(serviceResponse.data)

@@ -1,5 +1,5 @@
 {
-  "version": "2.0.8",
+  "version": "2.1.0",
   "author": "Conceptho",
   "bundleDependencies": [],
   "deprecated": false,
@@ -54,7 +54,7 @@
     "cli-step": "^1.0.2",
     "debug": "^4.1.1",
     "gradient-string": "^1.2.0",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.13",
     "pluralize": "^7.0.0"
   },
   "nyc": {
