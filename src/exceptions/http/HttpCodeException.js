@@ -19,7 +19,9 @@ class HttpCodeException extends LogicalException {
     this.message = message || defaultMessages[code]
   }
 
-  async handle ({ code, message, payload }, { response, serviceContext }) {
+  async handle (exceptionData = {}, ctx = {}) {
+    const { code, message, payload } = exceptionData
+    const { response, serviceContext } = ctx
     if (serviceContext) {
       await serviceContext.error()
     }

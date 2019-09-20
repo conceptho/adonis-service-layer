@@ -37,18 +37,9 @@ module.exports = QueryBuilder => {
     }
 
     /**
-     * Inject the ServiceContext if does not exist on the error.
-     * @param {*} error 
-     * @param {*} serviceContext 
-     */
-    _injectServiceContextOnError(error = {}, serviceContext) {
-      return defaults(error, { serviceContext })
-    }
-
-    /**
      * Verify a response returned by a Service.
      */
-    async verifyServiceResponse ({ response, serviceResponse, callback = async () => { }, serviceContext = null }) {
+    async verifyServiceResponse ({ response, serviceResponse, callback = async () => { } }) {
       const { error, data } = serviceResponse
   
       if (serviceResponse instanceof ServiceResponse) {
@@ -59,10 +50,10 @@ module.exports = QueryBuilder => {
           }
           return response.noContent()
         } else {
-          throw new HttpCodeException(400, this._injectServiceContextOnError(error, serviceContext))
+          throw new HttpCodeException(400, error)
         }
       } else {
-        throw new HttpCodeException(500, this._injectServiceContextOnError(error, serviceContext))
+        throw new HttpCodeException(500, error)
       }
     }
 
