@@ -61,6 +61,22 @@ test.group('base controller', group => {
 
     await controller.applyExpand({ data: user, expand: 'profile', whiteList: ['profile'] })
     assert.isDefined(user.$relations.profile)
+    assert.exists(user.$relations.profile)
+  })
+
+  test('applyExpand should handle a Model instance with ServiceContext', async assert => {
+    const Controller = use('App/Controllers/Controller')
+    const User = use('App/Models/User')
+    const Database = use('Database')
+    const ServiceContext = require('../../../src/services/ServiceContext')(Database)
+
+    const user = await User.first()
+    const controller = new Controller()
+    const serviceContext = new ServiceContext({ ctx: {} })
+    await serviceContext.init()
+    await controller.applyExpand({ data: user, expand: 'profile', whiteList: ['profile'], serviceContext })
+    assert.isDefined(user.$relations.profile)
+    assert.exists(user.$relations.profile)
   })
 
   test('applyExpand should not load property if it is listed on a blackList', async assert => {
@@ -81,7 +97,7 @@ test.group('base controller', group => {
     const controller = new Controller()
     const user = await User.first()
 
-    await controller.applyExpand({ data: user, expand: 'profile', blackList: ['profile'], whilteList: ['profile'] })
+    await controller.applyExpand({ data: user, expand: 'profile', blackList: ['profile'], whiteList: ['profile'] })
     assert.strictEqual(user.$relations.profile, undefined)
   })
 
@@ -90,9 +106,39 @@ test.group('base controller', group => {
     const User = use('App/Models/User')
 
     const controller = new Controller()
-    const result = await controller.applyExpand({ data: User.query(), expand: 'profile', whilteList: ['profile'] }).fetch()
+    const result = await controller.applyExpand({ data: User.query(), expand: 'profile', whiteList: ['profile'] }).fetch()
 
     assert.isArray(result.rows)
+    assert.isDefined(result.rows[0].$relations.profile)
+    assert.exists(result.rows[0].$relations.profile)
+  })
+
+  test('applyExpand should handle a QueryBuilder instance with ServiceContext', async assert => {
+    const Controller = use('App/Controllers/Controller')
+    const User = use('App/Models/User')
+    const Profile = use('App/Models/Profile')
+    const Database = use('Database')
+    const ServiceContext = require('../../../src/services/ServiceContext')(Database)
+
+    const controller = new Controller()
+    const serviceContext = new ServiceContext({ ctx: {} })
+    await serviceContext.init()
+    const secondServiceContext = await (async () => {
+      const serviceContext = new ServiceContext({ ctx: {} })
+      await serviceContext.init()
+      await Profile.query().transacting(serviceContext.transaction).delete()
+      return serviceContext
+    })()
+    const result = await controller.applyExpand({ data: User.query(), expand: 'profile', whiteList: ['profile'], serviceContext }).fetch()
+    const secondResult = await controller.applyExpand({ data: User.query(), expand: 'profile', whiteList: ['profile'], serviceContext: secondServiceContext }).fetch()
+    await serviceContext.success()
+    await secondServiceContext.success()
+    assert.isArray(result.rows)
+    assert.isArray(secondResult.rows)
+    assert.isDefined(result.rows[0].$relations.profile)
+    assert.isDefined(secondResult.rows[0].$relations.profile)
+    assert.exists(result.rows[0].$relations.profile)
+    assert.notExists(secondResult.rows[0].$relations.profile)
   })
 
   test('verifyServiceResponse should return data', async assert => {
