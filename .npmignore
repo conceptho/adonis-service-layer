@@ -1,1 +1,10 @@
 .git/
+.idea/
+.nyc_output/
+**/*.lcov
+**/*.sqlite3
+.vscode/
+circle.yml
+.github/
+docker-compose.yml
+Dockerfile

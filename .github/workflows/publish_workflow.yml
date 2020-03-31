@@ -1,0 +1,37 @@
+on:
+  push:
+  release:
+    types: [published]
+name: Build and Test Workflow, Publish only in Release
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - name: Build Docker Images for Testing
+        run: docker-compose build
+      - name: Start containers
+        run: docker-compose up -d
+      - name: Install Dependencies
+        run: npm install
+      - name: Log path
+        run: docker exec servicelayer ls
+      - name: Clear previous coverage outputs
+        run: rm -rf .nyc_output/ & rm -rf *.lcov
+      - name: Run lint
+        run: docker exec servicelayer npm run eslint:check
+      - name: Run tests
+        run: docker exec servicelayer npm run coverage:test
+      - name: Publish coverage
+        run: npm run coverage:publish
+      - name: Npm Login and Publish
+        if: github.event_name == 'release'
+        run: |
+          npm version ${{ github.event.release.tag_name }} --no-git-tag-version
+          echo "//registry.npmjs.org/:_authToken=$NPM_AUTH_TOKEN" > .npmrc
+          npm publish
+        env:
+          NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
