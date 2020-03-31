@@ -17,13 +17,13 @@ jobs:
       - name: Install Dependencies
         run: npm install
       - name: Log path
-        run: docker-compose exec service-layer ls
+        run: docker exec servicelayer ls
       - name: Clear previous coverage outputs
         run: rm -rf .nyc_output/ & rm -rf *.lcov
       - name: Run lint
-        run: docker-compose exec service-layer npm run eslint:check
+        run: docker exec servicelayer npm run eslint:check
       - name: Run tests
-        run: docker-compose exec service-layer npm run coverage:test
+        run: docker exec servicelayer npm run coverage:test
       - name: Publish coverage
         run: npm run coverage:publish
       - name: Npm Login and Publish
