@@ -1,4 +1,5 @@
 on:
+  push:
   release:
     types: [published]
 name: Publish Workflow
@@ -27,6 +28,7 @@ jobs:
       - name: Publish coverage
         run: npm run coverage:publish
       - name: Npm Login and Publish
+        if: github.event_name == 'release'
         run: |
           npm version ${{ github.event.release.tag_name }} --no-git-tag-version
           echo "//registry.npmjs.org/:_authToken=$NPM_AUTH_TOKEN" > .npmrc
