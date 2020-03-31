@@ -3,3 +3,6 @@ node_modules/
 .nyc_output/
 **/*.lcov
 **/*.sqlite3
+.vscode/
+circle.yml
+.github/
