@@ -2,9 +2,9 @@ on:
   push:
   release:
     types: [published]
-name: Publish Workflow
+name: Build and Test Workflow, Publish only in Release
 jobs:
-  publish:
+  build-and-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
