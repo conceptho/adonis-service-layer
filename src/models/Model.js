@@ -3,7 +3,7 @@ const { pick } = require('lodash')
 
 module.exports = (AdonisModel, Validator) =>
   class Model extends AdonisModel {
-    constructor(modelData) {
+    constructor (modelData) {
       super()
 
       if (modelData) {
@@ -11,7 +11,7 @@ module.exports = (AdonisModel, Validator) =>
       }
     }
 
-    static boot() {
+    static boot () {
       super.boot()
 
       const ModelHooks = require('../hooks/Model')(Validator)
@@ -20,7 +20,7 @@ module.exports = (AdonisModel, Validator) =>
       this.addHook('beforeSave', ModelHooks.updatedAtHook)
     }
 
-    static bootIfNotBooted() {
+    static bootIfNotBooted () {
       if (!this.$bootedBy) {
         this.$bootedBy = []
       }
@@ -38,11 +38,11 @@ module.exports = (AdonisModel, Validator) =>
      * await User.query().active().fetch()
      * @param {Object} query This models query builder
      */
-    static scopeActive(query) {
+    static scopeActive (query) {
       return query.andWhere({ deleted: 0 })
     }
 
-    static scopeFilter(query, filters) {
+    static scopeFilter (query, filters) {
       const normalizedFilters = Object.keys(filters).map(key => {
         const info = this.filterMapping(key)
         info.value = filters[key]
@@ -75,7 +75,7 @@ module.exports = (AdonisModel, Validator) =>
      *
      * @param {Object} transaction Knex transaction
      */
-    async softDelete(transaction) {
+    async softDelete (transaction) {
       this.deleted = 1
       const affected = await this.save(transaction)
 
@@ -86,7 +86,7 @@ module.exports = (AdonisModel, Validator) =>
       return !!affected
     }
 
-    static filterMapping(nameOperation) {
+    static filterMapping (nameOperation) {
       const operatorMapping = {
         eq: '=',
         neq: '<>',
@@ -105,8 +105,8 @@ module.exports = (AdonisModel, Validator) =>
       const operationKey = values[1] ? values[1].toLowerCase().trim() : 'eq'
       return ({ operation: operatorMapping[operationKey], name: values[0].trim() })
     }
-
-    async undelete(transaction) {
+    
+    async undelete (transaction) {
       this.unfreeze()
       this.deleted = 0
 
@@ -118,7 +118,7 @@ module.exports = (AdonisModel, Validator) =>
      * Array of function names for the related models
      * @returns {Array}
      */
-    static get relations() {
+    static get relations () {
       return []
     }
 
@@ -126,7 +126,7 @@ module.exports = (AdonisModel, Validator) =>
      * Object with Validation rules for this Model
      * @returns {{}}
      */
-    static get validationRules() {
+    static get validationRules () {
       return {}
     }
 
@@ -134,7 +134,7 @@ module.exports = (AdonisModel, Validator) =>
      * Object with the validation messages for this Model
      * @returns {{}}
      */
-    static get validationMessages() {
+    static get validationMessages () {
       return {}
     }
 
@@ -142,22 +142,22 @@ module.exports = (AdonisModel, Validator) =>
      * Object with the sanitization rules for this Model
      * @returns {{}}
      */
-    static get sanitizeRules() {
+    static get sanitizeRules () {
       return {}
     }
 
     /**
      * Array with the attributes that can be filtered
      */
-    static get canBeFiltered() {
+    static get canBeFiltered () {
       return ['id']
     }
 
-    static get Serializer() {
+    static get Serializer () {
       return DefaultSerializer
     }
 
-    async validate() {
+    async validate () {
       const { validationRules, validationMessages } = this.constructor
 
       const validation = await (this.isNew
@@ -171,7 +171,7 @@ module.exports = (AdonisModel, Validator) =>
       return { error: null }
     }
 
-    async deleteWithinTransaction(trx) {
+    async deleteWithinTransaction (trx) {
       /**
        * Executing before hooks
        */
