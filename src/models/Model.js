@@ -90,7 +90,7 @@ module.exports = (AdonisModel, Validator) =>
     static filterMapping (nameOperation) {
       return helperFilterMapping(nameOperation)
     }
-    
+
     async undelete (transaction) {
       this.unfreeze()
       this.deleted = 0
