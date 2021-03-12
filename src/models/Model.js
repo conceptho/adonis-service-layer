@@ -52,8 +52,7 @@ module.exports = (AdonisModel, Validator) =>
       return normalizedFilters.reduce((query, filterInfo) => {
         const { operation, value, name } = filterInfo
         if (this.canBeFiltered.indexOf(name) >= 0) {
-          return addQueryOperation(query, operation,name, value )
-          
+          return this.addQueryOperation(query, operation, name, value)
         }
         return query
       }, query)
@@ -61,17 +60,17 @@ module.exports = (AdonisModel, Validator) =>
 
     static addQueryOperation (query, operation, name, value) {
       if (operation === 'BETWEEN' && value) {
-        return query.whereBetween(name, value.split(',', 2));
+        return query.whereBetween(name, value.split(',', 2))
       } else if (operation === 'NOT BETWEEN') {
-        return query.whereNotBetween(name, value.split(',', 2));
+        return query.whereNotBetween(name, value.split(',', 2))
       } else if (operation === 'LIKE') {
-        return query.where(name, operation, `%${value}%`);
+        return query.where(name, operation, `%${value}%`)
       } else if (operation === 'IN') {
-        return query.whereIn(name, value.split(","));
+        return query.whereIn(name, value.split(','))
       } else if (operation === 'NOT IN') {
-        return query.whereNotIn(name, value.split(','));
+        return query.whereNotIn(name, value.split(','))
       } else {
-        return query.where(name, operation, value);
+        return query.where(name, operation, value)
       }
     }
 
