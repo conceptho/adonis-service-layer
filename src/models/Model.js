@@ -1,6 +1,6 @@
 const DefaultSerializer = require('../serializers/DefaultSerializer')
 const { pick } = require('lodash')
-const { helper: filterMapping } = require('./filter')
+const { helper: helperFilterMapping } = require('./filter')
 
 module.exports = (AdonisModel, Validator) =>
   class Model extends AdonisModel {
@@ -45,7 +45,7 @@ module.exports = (AdonisModel, Validator) =>
 
     static scopeFilter (query, filters) {
       const normalizedFilters = Object.keys(filters).map(key => {
-        const info = filterMapping(key)
+        const info = this.filterMapping(key)
         info.value = filters[key]
         return info
       })
@@ -85,6 +85,10 @@ module.exports = (AdonisModel, Validator) =>
       }
 
       return !!affected
+    }
+
+    static filterMapping (nameOperation) {
+      return helperFilterMapping(nameOperation)
     }
 
     async undelete (transaction) {
