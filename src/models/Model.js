@@ -58,7 +58,7 @@ module.exports = (AdonisModel, Validator) =>
       }, query)
     }
 
-    static scopeOrderByWrapper (query, orderByData) {
+    static scopeSortBy (query, orderByData) {
       const orderBy = orderByData
         ? {
           key: orderByData.split(':')[0],
