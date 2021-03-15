@@ -58,6 +58,20 @@ module.exports = (AdonisModel, Validator) =>
       }, query)
     }
 
+    static scopeSortBy (query, orderByData) {
+      const orderBy = orderByData
+        ? {
+          key: orderByData.split(':')[0],
+          value: orderByData.split(':').length > 1 ? orderByData.split(':')[1] : 'asc'
+        }
+        : {
+          key: 'created_at',
+          value: 'desc'
+        }
+
+      return query.orderBy(orderBy.key, orderBy.value)
+    }
+
     static addQueryOperation (query, operation, name, value) {
       if (operation === 'BETWEEN' && value) {
         return query.whereBetween(name, value.split(',', 2))
