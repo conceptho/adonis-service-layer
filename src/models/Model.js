@@ -83,11 +83,12 @@ module.exports = (AdonisModel, Validator) =>
         return query.whereIn(name, value.split(','))
       } else if (operation === 'NOT IN') {
         return query.whereNotIn(name, value.split(','))
+      } else if (operation === 'IS NULL' && (value === 'false' || value === 'true')) {
+        return value === 'true' ? query.whereNull(name) : query.whereNotNull(name)
       } else {
         return query.where(name, operation, value)
       }
     }
-
     /**
      *
      * @param {Object} transaction Knex transaction
