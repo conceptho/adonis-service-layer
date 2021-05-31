@@ -7,6 +7,7 @@ module.exports = Database =>
       this._successHooks = []
       this._errorHooks = []
       this._endHooks = []
+      this._afterCommitHooks = []
       this.isFinished = false
     }
 
@@ -24,6 +25,10 @@ module.exports = Database =>
 
     onEnd (callback) {
       this._endHooks.push(callback)
+    }
+
+    afterCommit (callback) {
+      this._afterCommitHooks.push(callback)
     }
 
     async end () {
@@ -44,6 +49,7 @@ module.exports = Database =>
       await Promise.all(this._successHooks.map(value => isFunction(value) ? value({ trx, ctx }) : null))
       if (this.transaction) {
         await this.transaction.commit()
+        await Promise.all(this._afterCommitHooks.map(value => isFunction(value) ? value({ trx, ctx }) : null))
       }
     }
 
