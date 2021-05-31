@@ -27,7 +27,7 @@ module.exports = Database =>
       this._endHooks.push(callback)
     }
 
-    afterCommit (callback) {
+    onAfterCommit (callback) {
       this._afterCommitHooks.push(callback)
     }
 
